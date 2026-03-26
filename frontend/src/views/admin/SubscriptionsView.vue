@@ -1,171 +1,224 @@
 <template>
   <AppLayout>
-    <TablePageLayout>
-      <template #filters>
-        <!-- Top Toolbar: Left (search + filters) / Right (actions) -->
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <!-- Left: Fuzzy user search + filters (wrap to multiple lines) -->
-          <div class="flex flex-1 flex-wrap items-center gap-3">
-            <!-- User Search -->
-            <div
-              class="relative w-full sm:w-64"
-              data-filter-user-search
-            >
-              <Icon
-                name="search"
-                size="md"
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                v-model="filterUserKeyword"
-                type="text"
-                :placeholder="t('admin.users.searchUsers')"
-                class="input pl-10 pr-8"
-                @input="debounceSearchFilterUsers"
-                @focus="showFilterUserDropdown = true"
-              />
-              <button
-                v-if="selectedFilterUser"
-                @click="clearFilterUser"
-                type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                :title="t('common.clear')"
-              >
-                <Icon name="x" size="sm" :stroke-width="2" />
-              </button>
+    <div class="space-y-6">
+      <section class="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-white via-amber-50/80 to-cyan-50/70 p-5 shadow-[0_24px_80px_rgba(245,158,11,0.12)] dark:border-white/10 dark:from-dark-900 dark:via-dark-900 dark:to-dark-800 md:p-7">
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.18),transparent_58%)]"></div>
+        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div class="max-w-3xl">
+            <div class="mb-3 inline-flex items-center rounded-full border border-amber-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-amber-700 shadow-sm dark:border-amber-800/60 dark:bg-dark-800/80 dark:text-amber-300">
+              Subscription Workspace
+            </div>
+            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-[2rem]">
+              Manage renewals, quota recovery, and entitlement windows from one operator view
+            </h2>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300 md:text-base">
+              The subscriptions page now follows the same admin V2 hierarchy as the rest of the console, with a clearer command header, focused filters, and a consistent operations shell around the table.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Subscriptions</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ pagination.total.toLocaleString() }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Status view</div>
+              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ currentStatusLabel }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Renew soon</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ expiringSoonCount }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Plans ready</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ subscriptionGroupOptions.length }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <!-- User Dropdown -->
-              <div
-                v-if="showFilterUserDropdown && (filterUserResults.length > 0 || filterUserKeyword)"
-                class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
-              >
-                <div
-                  v-if="filterUserLoading"
-                  class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
-                >
-                  {{ t('common.loading') }}
+      <TablePageLayout>
+        <template #filters>
+          <div class="space-y-4">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div class="inline-flex items-center rounded-full border border-cyan-200/80 bg-cyan-50/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:border-cyan-800/50 dark:bg-cyan-900/20 dark:text-cyan-300">
+                  Subscription Explorer
                 </div>
+                <h3 class="mt-3 text-lg font-semibold text-slate-900 dark:text-white">
+                  Filter the active subscription ledger
+                </h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-dark-300">
+                  Search by user, narrow by group or platform, and keep the key renewal actions available directly in the table.
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200">
+                  {{ pagination.total.toLocaleString() }} rows
+                </span>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200">
+                  {{ activeFilterCount }} active filters
+                </span>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200">
+                  {{ visibleColumnsCount }} visible columns
+                </span>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+              <div class="flex flex-1 flex-wrap items-center gap-3 rounded-[22px] border border-slate-200/80 bg-slate-50/80 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:border-dark-700 dark:bg-dark-800/70">
                 <div
-                  v-else-if="filterUserResults.length === 0 && filterUserKeyword"
-                  class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                  class="relative w-full md:w-72"
+                  data-filter-user-search
                 >
-                  {{ t('common.noOptionsFound') }}
+                  <Icon
+                    name="search"
+                    size="md"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    v-model="filterUserKeyword"
+                    type="text"
+                    :placeholder="t('admin.users.searchUsers')"
+                    class="input pl-10 pr-8"
+                    @input="debounceSearchFilterUsers"
+                    @focus="showFilterUserDropdown = true"
+                  />
+                  <button
+                    v-if="selectedFilterUser"
+                    @click="clearFilterUser"
+                    type="button"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    :title="t('common.clear')"
+                  >
+                    <Icon name="x" size="sm" :stroke-width="2" />
+                  </button>
+
+                  <div
+                    v-if="showFilterUserDropdown && (filterUserResults.length > 0 || filterUserKeyword)"
+                    class="absolute right-0 z-50 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-slate-200 bg-white/95 py-2 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-dark-600 dark:bg-dark-800/95"
+                  >
+                    <div
+                      v-if="filterUserLoading"
+                      class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      {{ t('common.loading') }}
+                    </div>
+                    <div
+                      v-else-if="filterUserResults.length === 0 && filterUserKeyword"
+                      class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      {{ t('common.noOptionsFound') }}
+                    </div>
+                    <button
+                      v-for="user in filterUserResults"
+                      :key="user.id"
+                      type="button"
+                      @click="selectFilterUser(user)"
+                      class="w-full px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
+                    >
+                      <span class="font-medium text-gray-900 dark:text-white">{{ user.email }}</span>
+                      <span class="ml-2 text-gray-500 dark:text-gray-400">#{{ user.id }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="w-full sm:w-40">
+                  <Select
+                    v-model="filters.status"
+                    :options="statusOptions"
+                    :placeholder="t('admin.subscriptions.allStatus')"
+                    @change="applyFilters"
+                  />
+                </div>
+                <div class="w-full sm:w-48">
+                  <Select
+                    v-model="filters.group_id"
+                    :options="groupOptions"
+                    :placeholder="t('admin.subscriptions.allGroups')"
+                    @change="applyFilters"
+                  />
+                </div>
+                <div class="w-full sm:w-40">
+                  <Select
+                    v-model="filters.platform"
+                    :options="platformFilterOptions"
+                    :placeholder="t('admin.subscriptions.allPlatforms')"
+                    @change="applyFilters"
+                  />
+                </div>
+              </div>
+
+              <div class="flex w-full flex-shrink-0 flex-wrap items-center justify-end gap-3 rounded-[22px] border border-slate-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/80 xl:w-auto">
+                <button
+                  @click="loadSubscriptions"
+                  :disabled="loading"
+                  class="btn btn-secondary"
+                  :title="t('common.refresh')"
+                >
+                  <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
+                </button>
+                <div class="relative" ref="columnDropdownRef">
+                  <button
+                    @click="showColumnDropdown = !showColumnDropdown"
+                    class="btn btn-secondary px-2 md:px-3"
+                    :title="t('admin.users.columnSettings')"
+                  >
+                    <svg class="h-4 w-4 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z" />
+                    </svg>
+                    <span class="hidden md:inline">{{ t('admin.users.columnSettings') }}</span>
+                  </button>
+                  <div
+                    v-if="showColumnDropdown"
+                    class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 py-2 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-dark-600 dark:bg-dark-800/95"
+                  >
+                    <div class="px-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Columns</div>
+                    <div class="mb-2 border-b border-slate-100 pb-2 dark:border-dark-700">
+                      <div class="px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">
+                        {{ t('admin.subscriptions.columns.user') }}
+                      </div>
+                      <button
+                        @click="setUserColumnMode('email')"
+                        class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
+                      >
+                        <span>{{ t('admin.users.columns.email') }}</span>
+                        <Icon v-if="userColumnMode === 'email'" name="check" size="sm" class="text-primary-500" />
+                      </button>
+                      <button
+                        @click="setUserColumnMode('username')"
+                        class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
+                      >
+                        <span>{{ t('admin.users.columns.username') }}</span>
+                        <Icon v-if="userColumnMode === 'username'" name="check" size="sm" class="text-primary-500" />
+                      </button>
+                    </div>
+                    <button
+                      v-for="col in toggleableColumns"
+                      :key="col.key"
+                      @click="toggleColumn(col.key)"
+                      class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
+                    >
+                      <span>{{ col.label }}</span>
+                      <Icon v-if="isColumnVisible(col.key)" name="check" size="sm" class="text-primary-500" />
+                    </button>
+                  </div>
                 </div>
                 <button
-                  v-for="user in filterUserResults"
-                  :key="user.id"
-                  type="button"
-                  @click="selectFilterUser(user)"
-                  class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  @click="showGuideModal = true"
+                  class="btn btn-secondary px-2 md:px-3"
+                  :title="t('admin.subscriptions.guide.showGuide')"
                 >
-                  <span class="font-medium text-gray-900 dark:text-white">{{ user.email }}</span>
-                  <span class="ml-2 text-gray-500 dark:text-gray-400">#{{ user.id }}</span>
+                  <Icon name="questionCircle" size="md" class="md:mr-1.5" />
+                  <span class="hidden md:inline">{{ t('admin.subscriptions.guide.showGuide') }}</span>
+                </button>
+                <button @click="showAssignModal = true" class="btn btn-primary shadow-glow">
+                  <Icon name="plus" size="md" class="mr-2" />
+                  {{ t('admin.subscriptions.assignSubscription') }}
                 </button>
               </div>
             </div>
-
-            <!-- Filters -->
-            <div class="w-full sm:w-40">
-              <Select
-                v-model="filters.status"
-                :options="statusOptions"
-                :placeholder="t('admin.subscriptions.allStatus')"
-                @change="applyFilters"
-              />
-            </div>
-            <div class="w-full sm:w-48">
-              <Select
-                v-model="filters.group_id"
-                :options="groupOptions"
-                :placeholder="t('admin.subscriptions.allGroups')"
-                @change="applyFilters"
-              />
-            </div>
-            <div class="w-full sm:w-40">
-              <Select
-                v-model="filters.platform"
-                :options="platformFilterOptions"
-                :placeholder="t('admin.subscriptions.allPlatforms')"
-                @change="applyFilters"
-              />
-            </div>
           </div>
-
-          <!-- Right: Actions -->
-          <div class="ml-auto flex flex-wrap items-center justify-end gap-3">
-            <button
-              @click="loadSubscriptions"
-              :disabled="loading"
-              class="btn btn-secondary"
-              :title="t('common.refresh')"
-            >
-              <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
-            </button>
-            <!-- Column Settings Dropdown -->
-            <div class="relative" ref="columnDropdownRef">
-              <button
-                @click="showColumnDropdown = !showColumnDropdown"
-                class="btn btn-secondary px-2 md:px-3"
-                :title="t('admin.users.columnSettings')"
-              >
-                <svg class="h-4 w-4 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z" />
-                </svg>
-                <span class="hidden md:inline">{{ t('admin.users.columnSettings') }}</span>
-              </button>
-              <!-- Dropdown menu -->
-              <div
-                v-if="showColumnDropdown"
-                class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
-              >
-                <div class="p-2">
-                  <!-- User column mode selection -->
-                  <div class="mb-2 border-b border-gray-200 pb-2 dark:border-gray-700">
-                    <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-                      {{ t('admin.subscriptions.columns.user') }}
-                    </div>
-                    <button
-                      @click="setUserColumnMode('email')"
-                      class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                    >
-                      <span>{{ t('admin.users.columns.email') }}</span>
-                      <Icon v-if="userColumnMode === 'email'" name="check" size="sm" class="text-primary-500" />
-                    </button>
-                    <button
-                      @click="setUserColumnMode('username')"
-                      class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                    >
-                      <span>{{ t('admin.users.columns.username') }}</span>
-                      <Icon v-if="userColumnMode === 'username'" name="check" size="sm" class="text-primary-500" />
-                    </button>
-                  </div>
-                  <!-- Other columns toggle -->
-                  <button
-                    v-for="col in toggleableColumns"
-                    :key="col.key"
-                    @click="toggleColumn(col.key)"
-                    class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    <span>{{ col.label }}</span>
-                    <Icon v-if="isColumnVisible(col.key)" name="check" size="sm" class="text-primary-500" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            <button
-              @click="showGuideModal = true"
-              class="btn btn-secondary"
-              :title="t('admin.subscriptions.guide.showGuide')"
-            >
-              <Icon name="questionCircle" size="md" />
-            </button>
-            <button @click="showAssignModal = true" class="btn btn-primary">
-              <Icon name="plus" size="md" class="mr-2" />
-              {{ t('admin.subscriptions.assignSubscription') }}
-            </button>
-          </div>
-        </div>
-      </template>
+        </template>
 
       <!-- Subscriptions Table -->
       <template #table>
@@ -331,7 +384,7 @@
                 "
                 class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-3 py-2 dark:from-emerald-900/20 dark:to-teal-900/20"
               >
-                <span class="text-lg text-emerald-600 dark:text-emerald-400">∞</span>
+                <span class="text-lg text-emerald-600 dark:text-emerald-400">&infin;</span>
                 <span class="text-xs font-medium text-emerald-700 dark:text-emerald-300">
                   {{ t('admin.subscriptions.unlimited') }}
                 </span>
@@ -376,31 +429,31 @@
           </template>
 
           <template #cell-actions="{ row }">
-            <div class="flex items-center gap-1">
+            <div class="flex flex-wrap items-center gap-2">
               <button
                 v-if="row.status === 'active' || row.status === 'expired'"
                 @click="handleExtend(row)"
-                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                class="subscription-action subscription-action-primary"
               >
                 <Icon name="calendar" size="sm" />
-                <span class="text-xs">{{ t('admin.subscriptions.adjust') }}</span>
+                <span>{{ t('admin.subscriptions.adjust') }}</span>
               </button>
               <button
                 v-if="row.status === 'active'"
                 @click="handleResetQuota(row)"
                 :disabled="resettingQuota && resettingSubscription?.id === row.id"
-                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                class="subscription-action subscription-action-warning disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Icon name="refresh" size="sm" />
-                <span class="text-xs">{{ t('admin.subscriptions.resetQuota') }}</span>
+                <span>{{ t('admin.subscriptions.resetQuota') }}</span>
               </button>
               <button
                 v-if="row.status === 'active'"
                 @click="handleRevoke(row)"
-                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                class="subscription-action subscription-action-danger"
               >
                 <Icon name="ban" size="sm" />
-                <span class="text-xs">{{ t('admin.subscriptions.revoke') }}</span>
+                <span>{{ t('admin.subscriptions.revoke') }}</span>
               </button>
             </div>
           </template>
@@ -418,16 +471,17 @@
 
       <!-- Pagination -->
       <template #pagination>
-      <Pagination
-        v-if="pagination.total > 0"
-        :page="pagination.page"
-        :total="pagination.total"
-        :page-size="pagination.page_size"
-        @update:page="handlePageChange"
-        @update:pageSize="handlePageSizeChange"
-      />
+        <Pagination
+          v-if="pagination.total > 0"
+          :page="pagination.page"
+          :total="pagination.total"
+          :page-size="pagination.page_size"
+          @update:page="handlePageChange"
+          @update:pageSize="handlePageSizeChange"
+        />
       </template>
     </TablePageLayout>
+    </div>
 
     <!-- Assign Subscription Modal -->
     <BaseDialog
@@ -463,7 +517,7 @@
             <!-- User Dropdown -->
             <div
               v-if="showUserDropdown && (userSearchResults.length > 0 || userSearchKeyword)"
-              class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+              class="absolute right-0 z-50 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-slate-200 bg-white/95 py-2 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-dark-600 dark:bg-dark-800/95"
             >
               <div
                 v-if="userSearchLoading"
@@ -482,7 +536,7 @@
                 :key="user.id"
                 type="button"
                 @click="selectUser(user)"
-                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                class="w-full px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
               >
                 <span class="font-medium text-gray-900 dark:text-white">{{ user.email }}</span>
                 <span class="ml-2 text-gray-500 dark:text-gray-400">#{{ user.id }}</span>
@@ -880,6 +934,7 @@ const columns = computed<Column[]>(() =>
     col.key === 'user' || col.key === 'actions' || !hiddenColumns.has(col.key)
   )
 )
+const visibleColumnsCount = computed(() => columns.value.length)
 
 // Column dropdown state
 const showColumnDropdown = ref(false)
@@ -920,6 +975,15 @@ const filters = reactive({
   platform: '',
   user_id: null as number | null
 })
+const activeFilterCount = computed(() =>
+  [filters.status, filters.group_id, filters.platform, filters.user_id].filter(
+    value => value !== '' && value !== null && value !== undefined
+  ).length
+)
+const currentStatusLabel = computed(() =>
+  statusOptions.value.find(option => option.value === filters.status)?.label ||
+  t('admin.subscriptions.allStatus')
+)
 
 // Sorting state
 const sortState = reactive({
@@ -1213,7 +1277,7 @@ const closeExtendModal = () => {
 const handleExtendSubscription = async () => {
   if (!extendingSubscription.value) return
 
-  // 前端验证：调整后的过期时间必须在未来
+  // Guard against adjustments that would still leave the subscription expired.
   if (extendingSubscription.value.expires_at) {
     const expiresAt = new Date(extendingSubscription.value.expires_at)
     const newExpiresAt = new Date(expiresAt.getTime() + extendForm.days * 24 * 60 * 60 * 1000)
@@ -1295,6 +1359,11 @@ const isExpiringSoon = (expiresAt: string): boolean => {
   const days = getDaysRemaining(expiresAt)
   return days !== null && days <= 7
 }
+const expiringSoonCount = computed(() =>
+  subscriptions.value.filter(subscription =>
+    subscription.expires_at ? isExpiringSoon(subscription.expires_at) : false
+  ).length
+)
 
 const getProgressWidth = (used: number | null | undefined, limit: number | null): string => {
   if (!limit || limit === 0) return '0%'
@@ -1395,4 +1464,22 @@ onUnmounted(() => {
 .reset-info {
   @apply flex items-center gap-1 pl-12 text-[10px] text-blue-600 dark:text-blue-400;
 }
+
+.subscription-action {
+  @apply inline-flex items-center gap-1 rounded-xl border px-2.5 py-2 text-xs font-medium transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm;
+}
+
+.subscription-action-primary {
+  @apply border-sky-100 bg-sky-50/80 text-sky-700 dark:border-sky-900/30 dark:bg-sky-900/10 dark:text-sky-300;
+}
+
+.subscription-action-warning {
+  @apply border-amber-100 bg-amber-50/80 text-amber-700 dark:border-amber-900/30 dark:bg-amber-900/10 dark:text-amber-300;
+}
+
+.subscription-action-danger {
+  @apply border-red-100 bg-red-50/80 text-red-600 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400;
+}
 </style>
+
+
