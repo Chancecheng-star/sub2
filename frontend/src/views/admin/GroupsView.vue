@@ -1,42 +1,11 @@
 <template>
   <AppLayout>
-    <div class="mb-6 space-y-4">
-      <div class="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-white via-sky-50/80 to-indigo-50/70 p-5 shadow-[0_24px_80px_rgba(59,130,246,0.12)] dark:border-white/10 dark:from-dark-900 dark:via-dark-900 dark:to-dark-800 md:p-7">
-        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.16),transparent_58%)]"></div>
-        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div class="max-w-3xl">
-            <div class="mb-3 inline-flex items-center rounded-full border border-sky-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm dark:border-sky-800/60 dark:bg-dark-800/80 dark:text-sky-300">
-              Group Operations
-            </div>
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-[2rem]">
-              分组策略、平台接入能力与容量分配统一管理
-            </h2>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300 md:text-base">
-              这一页承接平台分组、费率策略、容量与可用账号池的管理。页面节奏继续向 Mandal 的后台母版统一靠拢。
-            </p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Groups</div>
-              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ pagination.total }}</div>
-            </div>
-            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Platforms</div>
-              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ platformFilterOptions.length - 1 }} connected</div>
-            </div>
-            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80 col-span-2 sm:col-span-1">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">View</div>
-              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">Capacity & billing overview</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
     <TablePageLayout>
       <template #filters>
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div class="flex flex-1 flex-wrap items-center gap-3 rounded-[22px] border border-slate-200/80 bg-slate-50/80 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:border-dark-700 dark:bg-dark-800/70">
-            <div class="relative w-full sm:w-72">
+        <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+          <!-- Left: fuzzy search + filters (can wrap to multiple lines) -->
+          <div class="flex flex-1 flex-wrap items-center gap-3">
+            <div class="relative w-full sm:w-64">
               <Icon
                 name="search"
                 size="md"
@@ -50,30 +19,31 @@
                 @input="handleSearch"
               />
             </div>
-            <Select
-              v-model="filters.platform"
-              :options="platformFilterOptions"
-              :placeholder="t('admin.groups.allPlatforms')"
-              class="w-full sm:w-44"
-              @change="loadGroups"
-            />
-            <Select
-              v-model="filters.status"
-              :options="statusOptions"
-              :placeholder="t('admin.groups.allStatus')"
-              class="w-full sm:w-40"
-              @change="loadGroups"
-            />
-            <Select
-              v-model="filters.is_exclusive"
-              :options="exclusiveOptions"
-              :placeholder="t('admin.groups.allGroups')"
-              class="w-full sm:w-44"
-              @change="loadGroups"
-            />
+          <Select
+            v-model="filters.platform"
+            :options="platformFilterOptions"
+            :placeholder="t('admin.groups.allPlatforms')"
+            class="w-44"
+            @change="loadGroups"
+          />
+          <Select
+            v-model="filters.status"
+            :options="statusOptions"
+            :placeholder="t('admin.groups.allStatus')"
+            class="w-40"
+            @change="loadGroups"
+          />
+          <Select
+            v-model="filters.is_exclusive"
+            :options="exclusiveOptions"
+            :placeholder="t('admin.groups.allGroups')"
+            class="w-44"
+            @change="loadGroups"
+          />
           </div>
 
-          <div class="flex w-full flex-shrink-0 flex-wrap items-center justify-end gap-3 rounded-[22px] border border-slate-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/80 xl:w-auto">
+          <!-- Right: actions -->
+          <div class="flex w-full flex-shrink-0 flex-wrap items-center justify-end gap-3 lg:w-auto">
             <button
               @click="loadGroups"
               :disabled="loading"
@@ -92,7 +62,7 @@
             </button>
             <button
               @click="showCreateModal = true"
-              class="btn btn-primary shadow-glow"
+              class="btn btn-primary"
               data-tour="groups-create-btn"
             >
               <Icon name="plus" size="md" class="mr-2" />
@@ -183,14 +153,7 @@
           </template>
 
           <template #cell-is_exclusive="{ value }">
-            <span
-              :class="[
-                'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]',
-                value
-                  ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300'
-                  : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-dark-600 dark:bg-dark-700/70 dark:text-dark-200'
-              ]"
-            >
+            <span :class="['badge', value ? 'badge-primary' : 'badge-gray']">
               {{ value ? t('admin.groups.exclusive') : t('admin.groups.public') }}
             </span>
           </template>
@@ -243,41 +206,33 @@
           </template>
 
           <template #cell-status="{ value }">
-            <span
-              :class="[
-                'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]',
-                value === 'active'
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300'
-                  : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-300'
-              ]"
-            >
-              <span :class="['inline-block h-2 w-2 rounded-full', value === 'active' ? 'bg-emerald-500' : 'bg-rose-500']"></span>
+            <span :class="['badge', value === 'active' ? 'badge-success' : 'badge-danger']">
               {{ t('admin.accounts.status.' + value) }}
             </span>
           </template>
 
           <template #cell-actions="{ row }">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1">
               <button
                 @click="handleEdit(row)"
-                class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:text-primary-600 hover:shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200 dark:hover:border-primary-700 dark:hover:text-primary-300"
+                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-dark-700 dark:hover:text-primary-400"
               >
                 <Icon name="edit" size="sm" />
-                <span>{{ t('common.edit') }}</span>
+                <span class="text-xs">{{ t('common.edit') }}</span>
               </button>
               <button
                 @click="handleRateMultipliers(row)"
-                class="inline-flex items-center gap-1 rounded-xl border border-violet-100 bg-violet-50/80 px-2.5 py-2 text-xs font-medium text-violet-700 transition-all hover:-translate-y-0.5 hover:bg-violet-100 hover:shadow-sm dark:border-violet-900/30 dark:bg-violet-900/10 dark:text-violet-300 dark:hover:bg-violet-900/20"
+                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-dark-700 dark:hover:text-purple-400"
               >
                 <Icon name="dollar" size="sm" />
-                <span>{{ t('admin.groups.rateMultipliers') }}</span>
+                <span class="text-xs">{{ t('admin.groups.rateMultipliers') }}</span>
               </button>
               <button
                 @click="handleDelete(row)"
-                class="inline-flex items-center gap-1 rounded-xl border border-red-100 bg-red-50/80 px-2.5 py-2 text-xs font-medium text-red-600 transition-all hover:-translate-y-0.5 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20"
+                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               >
                 <Icon name="trash" size="sm" />
-                <span>{{ t('common.delete') }}</span>
+                <span class="text-xs">{{ t('common.delete') }}</span>
               </button>
             </div>
           </template>

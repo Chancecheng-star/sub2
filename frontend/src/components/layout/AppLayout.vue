@@ -1,17 +1,21 @@
 <template>
-  <div class="relative min-h-screen overflow-hidden dark:bg-dark-950">
-    <div class="pointer-events-none fixed inset-0 bg-mesh-gradient opacity-90"></div>
-    <div class="pointer-events-none fixed inset-x-0 top-0 h-56 bg-gradient-to-b from-white/70 to-transparent dark:from-dark-950/30"></div>
+  <div class="min-h-screen bg-gray-50 dark:bg-dark-950">
+    <!-- Background Decoration -->
+    <div class="pointer-events-none fixed inset-0 bg-mesh-gradient"></div>
 
+    <!-- Sidebar -->
     <AppSidebar />
 
+    <!-- Main Content Area -->
     <div
       class="relative min-h-screen transition-all duration-300"
-      :class="[sidebarCollapsed ? 'lg:ml-[96px]' : 'lg:ml-[18rem]']"
+      :class="[sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-64']"
     >
+      <!-- Header -->
       <AppHeader />
 
-      <main class="px-4 pb-8 pt-5 md:px-6 lg:px-8 lg:pb-10 lg:pt-6">
+      <!-- Main Content -->
+      <main class="p-4 md:p-6 lg:p-8">
         <slot />
       </main>
     </div>

@@ -1,18 +1,16 @@
 <template>
   <BaseDialog :show="show" :title="title" width="narrow" @close="handleCancel">
     <div class="space-y-4">
-      <div class="rounded-[20px] border border-slate-200/80 bg-slate-50/80 px-4 py-4 dark:border-dark-700 dark:bg-dark-800/70">
-        <p class="text-sm leading-6 text-slate-600 dark:text-gray-300">{{ message }}</p>
-      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-400">{{ message }}</p>
       <slot></slot>
     </div>
 
     <template #footer>
-      <div class="flex justify-end gap-3">
+      <div class="flex justify-end space-x-3">
         <button
           @click="handleCancel"
           type="button"
-          class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-2 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-200 dark:hover:bg-dark-600 dark:focus:ring-offset-dark-800"
+          class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-200 dark:hover:bg-dark-600 dark:focus:ring-offset-dark-800"
         >
           {{ cancelText }}
         </button>
@@ -20,10 +18,10 @@
           @click="handleConfirm"
           type="button"
           :class="[
-            'rounded-2xl px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-dark-800',
+            'rounded-md px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-dark-800',
             danger
-              ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500/30'
-              : 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500/30 shadow-glow'
+              ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+              : 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500'
           ]"
         >
           {{ confirmText }}

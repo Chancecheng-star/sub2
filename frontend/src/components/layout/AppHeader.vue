@@ -1,6 +1,6 @@
 <template>
-  <header class="sticky top-3 z-30 px-1 lg:px-3">
-    <div class="glass mx-auto flex min-h-[72px] items-center justify-between rounded-[28px] px-4 md:px-6">
+  <header class="glass sticky top-0 z-30 border-b border-gray-200/50 dark:border-dark-700/50">
+    <div class="flex h-16 items-center justify-between px-4 md:px-6">
       <!-- Left: Mobile Menu Toggle + Page Title -->
       <div class="flex items-center gap-4">
         <button
@@ -12,10 +12,7 @@
         </button>
 
         <div class="hidden lg:block">
-          <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary-500/90 dark:text-primary-300">
-            Admin Workspace
-          </div>
-          <h1 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
+          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ pageTitle }}
           </h1>
           <p v-if="pageDescription" class="text-xs text-gray-500 dark:text-dark-400">
@@ -35,7 +32,7 @@
           :href="docUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-1.5 rounded-2xl border border-white/70 bg-white/75 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900 dark:border-dark-700 dark:bg-dark-800/70 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+          class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
         >
           <Icon name="book" size="sm" />
           <span class="hidden sm:inline">{{ t('nav.docs') }}</span>
@@ -50,7 +47,7 @@
         <!-- Balance Display -->
         <div
           v-if="user"
-          class="hidden items-center gap-2 rounded-2xl border border-primary-100 bg-gradient-to-r from-primary-50 to-accent-50 px-3 py-2 shadow-sm dark:border-primary-900/40 dark:bg-primary-900/20 sm:flex"
+          class="hidden items-center gap-2 rounded-xl bg-primary-50 px-3 py-1.5 dark:bg-primary-900/20 sm:flex"
         >
           <svg
             class="h-4 w-4 text-primary-600 dark:text-primary-400"
@@ -74,7 +71,7 @@
         <div v-if="user" class="relative" ref="dropdownRef">
           <button
             @click="toggleDropdown"
-            class="flex items-center gap-2 rounded-2xl border border-white/70 bg-white/70 p-1.5 transition-colors hover:bg-white dark:border-dark-700 dark:bg-dark-800/70 dark:hover:bg-dark-800"
+            class="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-dark-800"
             aria-label="User Menu"
           >
             <div
