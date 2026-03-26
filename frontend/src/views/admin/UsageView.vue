@@ -1,81 +1,20 @@
 <template>
   <AppLayout>
     <div class="space-y-6">
-      <section class="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-white via-emerald-50/80 to-sky-50/70 p-5 shadow-[0_24px_80px_rgba(16,185,129,0.12)] dark:border-white/10 dark:from-dark-900 dark:via-dark-900 dark:to-dark-800 md:p-7">
-        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.18),transparent_58%)]"></div>
-        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div class="max-w-3xl">
-            <div class="mb-3 inline-flex items-center rounded-full border border-emerald-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 shadow-sm dark:border-emerald-800/60 dark:bg-dark-800/80 dark:text-emerald-300">
-              Usage Intelligence
-            </div>
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-[2rem]">
-              Track request volume, cost, and traffic shape in one operator view
-            </h2>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300 md:text-base">
-              The usage page now follows the same admin V2 hierarchy as the rest of the console, with a clearer analytics workspace, focused filters, and a consistent table shell.
-            </p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Logs</div>
-              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ pagination.total.toLocaleString() }}</div>
-            </div>
-            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Filters</div>
-              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ activeFilterCount }}</div>
-            </div>
-            <div class="col-span-2 rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80 sm:col-span-1">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Columns</div>
-              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ visibleColumnsCount }} visible</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <UsageStatsCards :stats="usageStats" />
-
-      <section class="rounded-[30px] border border-white/70 bg-white/80 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur-xl dark:border-white/10 dark:bg-dark-900/80 md:p-6">
-        <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div class="max-w-3xl">
-            <div class="inline-flex items-center rounded-full border border-sky-200/80 bg-sky-50/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 dark:border-sky-800/50 dark:bg-sky-900/20 dark:text-sky-300">
-              Analytics Workspace
+      <!-- Charts Section -->
+      <div class="space-y-4">
+        <div class="card p-4">
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.dashboard.timeRange') }}:</span>
+              <DateRangePicker
+                v-model:start-date="startDate"
+                v-model:end-date="endDate"
+                @change="onDateRangeChange"
+              />
             </div>
-            <h3 class="mt-3 text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
-              Compare model, group, endpoint, and token activity across the same time window
-            </h3>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300">
-              Date range and granularity stay aligned across every chart so the operational trends and raw logs tell the same story.
-            </p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/70">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Range</div>
-              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ startDate }} to {{ endDate }}</div>
-            </div>
-            <div class="rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/70">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Granularity</div>
-              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ currentGranularityLabel }}</div>
-            </div>
-            <div class="col-span-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/70 lg:col-span-1">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Account billed</div>
-              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">${{ totalAccountCost.toFixed(2) }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-5 rounded-[24px] border border-slate-200/80 bg-slate-50/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:border-dark-700 dark:bg-dark-800/70">
-          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.dashboard.timeRange') }}:</span>
-                <DateRangePicker
-                  v-model:start-date="startDate"
-                  v-model:end-date="endDate"
-                  @change="onDateRangeChange"
-                />
-              </div>
-            </div>
-            <div class="flex items-center gap-2 lg:ml-auto">
+            <div class="ml-auto flex items-center gap-2">
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.dashboard.granularity') }}:</span>
               <div class="w-28">
                 <Select v-model="granularity" :options="granularityOptions" @change="loadChartData" />
@@ -83,8 +22,7 @@
             </div>
           </div>
         </div>
-
-        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ModelDistributionChart
             v-model:source="modelDistributionSource"
             v-model:metric="modelDistributionMetric"
@@ -106,7 +44,7 @@
             :end-date="endDate"
           />
         </div>
-        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <EndpointDistributionChart
             v-model:source="endpointDistributionSource"
             v-model:metric="endpointDistributionMetric"
@@ -122,105 +60,45 @@
           />
           <TokenUsageTrend :trend-data="trendData" :loading="chartsLoading" />
         </div>
-      </section>
-
-      <TablePageLayout>
-        <template #filters>
-          <div class="space-y-4">
-            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <div class="inline-flex items-center rounded-full border border-violet-200/80 bg-violet-50/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:border-violet-800/50 dark:bg-violet-900/20 dark:text-violet-300">
-                  Usage Log Explorer
-                </div>
-                <h3 class="mt-3 text-lg font-semibold text-slate-900 dark:text-white">
-                  Filter the raw request stream
-                </h3>
-                <p class="mt-1 text-sm text-slate-600 dark:text-dark-300">
-                  Search by user, key, account, group, model, request type, and billing mode before exporting or cleaning up usage data.
-                </p>
-              </div>
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200">
-                  {{ pagination.total.toLocaleString() }} rows
-                </span>
-                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200">
-                  {{ activeFilterCount }} active filters
-                </span>
-              </div>
-            </div>
-
-            <UsageFilters
-              v-model="filters"
-              embedded
-              :start-date="startDate"
-              :end-date="endDate"
-              :exporting="exporting"
-              @change="applyFilters"
-              @refresh="refreshData"
-              @reset="resetFilters"
-              @cleanup="openCleanupDialog"
-              @export="exportToExcel"
+      </div>
+      <UsageFilters v-model="filters" :start-date="startDate" :end-date="endDate" :exporting="exporting" @change="applyFilters" @refresh="refreshData" @reset="resetFilters" @cleanup="openCleanupDialog" @export="exportToExcel">
+        <template #after-reset>
+          <div class="relative" ref="columnDropdownRef">
+            <button
+              @click="showColumnDropdown = !showColumnDropdown"
+              class="btn btn-secondary px-2 md:px-3"
+              :title="t('admin.users.columnSettings')"
             >
-              <template #after-reset>
-                <div class="relative" ref="columnDropdownRef">
-                  <button
-                    @click="showColumnDropdown = !showColumnDropdown"
-                    class="btn btn-secondary px-2 md:px-3"
-                    :title="t('admin.users.columnSettings')"
-                  >
-                    <svg class="h-4 w-4 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z" />
-                    </svg>
-                    <span class="hidden md:inline">{{ t('admin.users.columnSettings') }}</span>
-                  </button>
-                  <div
-                    v-if="showColumnDropdown"
-                    class="absolute right-0 top-full z-50 mt-2 max-h-80 w-56 overflow-y-auto rounded-2xl border border-slate-200 bg-white/95 py-2 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-dark-600 dark:bg-dark-800/95"
-                  >
-                    <div class="px-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Columns</div>
-                    <button
-                      v-for="col in toggleableColumns"
-                      :key="col.key"
-                      @click="toggleColumn(col.key)"
-                      class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
-                    >
-                      <span>{{ col.label }}</span>
-                      <Icon
-                        v-if="isColumnVisible(col.key)"
-                        name="check"
-                        size="sm"
-                        class="text-primary-500"
-                        :stroke-width="2"
-                      />
-                    </button>
-                  </div>
-                </div>
-              </template>
-            </UsageFilters>
+              <svg class="h-4 w-4 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+              <span class="hidden md:inline">{{ t('admin.users.columnSettings') }}</span>
+            </button>
+            <div
+              v-if="showColumnDropdown"
+              class="absolute right-0 top-full z-50 mt-1 max-h-80 w-48 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-dark-600 dark:bg-dark-800"
+            >
+              <button
+                v-for="col in toggleableColumns"
+                :key="col.key"
+                @click="toggleColumn(col.key)"
+                class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+              >
+                <span>{{ col.label }}</span>
+                <Icon
+                  v-if="isColumnVisible(col.key)"
+                  name="check"
+                  size="sm"
+                  class="text-primary-500"
+                  :stroke-width="2"
+                />
+              </button>
+            </div>
           </div>
         </template>
-
-        <template #table>
-          <UsageTable
-            embedded
-            :data="usageLogs"
-            :loading="loading"
-            :columns="visibleColumns"
-            @userClick="handleUserClick"
-          />
-        </template>
-
-        <template #pagination>
-          <Pagination
-            v-if="pagination.total > 0"
-            :page="pagination.page"
-            :total="pagination.total"
-            :page-size="pagination.page_size"
-            @update:page="handlePageChange"
-            @update:pageSize="handlePageSizeChange"
-          />
-        </template>
-      </TablePageLayout>
+      </UsageFilters>
+      <UsageTable :data="usageLogs" :loading="loading" :columns="visibleColumns" @userClick="handleUserClick" />
+      <Pagination v-if="pagination.total > 0" :page="pagination.page" :total="pagination.total" :page-size="pagination.page_size" @update:page="handlePageChange" @update:pageSize="handlePageSizeChange" />
     </div>
   </AppLayout>
   <UsageExportProgress :show="exportProgress.show" :progress="exportProgress.progress" :current="exportProgress.current" :total="exportProgress.total" :estimated-time="exportProgress.estimatedTime" @cancel="cancelExport" />
@@ -250,7 +128,6 @@ import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 import { formatReasoningEffort } from '@/utils/format'
 import { resolveUsageRequestType, requestTypeToLegacyStream } from '@/utils/usageRequestType'
 import AppLayout from '@/components/layout/AppLayout.vue'; import Pagination from '@/components/common/Pagination.vue'; import Select from '@/components/common/Select.vue'; import DateRangePicker from '@/components/common/DateRangePicker.vue'
-import TablePageLayout from '@/components/layout/TablePageLayout.vue'
 import UsageStatsCards from '@/components/admin/usage/UsageStatsCards.vue'; import UsageFilters from '@/components/admin/usage/UsageFilters.vue'
 import UsageTable from '@/components/admin/usage/UsageTable.vue'; import UsageExportProgress from '@/components/admin/usage/UsageExportProgress.vue'
 import UsageCleanupDialog from '@/components/admin/usage/UsageCleanupDialog.vue'
@@ -328,8 +205,6 @@ const defaultRange = getLast24HoursRangeDates()
 const startDate = ref(defaultRange.start); const endDate = ref(defaultRange.end)
 const filters = ref<AdminUsageQueryParams>({ user_id: undefined, model: undefined, group_id: undefined, request_type: undefined, billing_type: null, start_date: startDate.value, end_date: endDate.value })
 const pagination = reactive({ page: 1, page_size: getPersistedPageSize(), total: 0 })
-const currentGranularityLabel = computed(() => granularity.value === 'hour' ? t('admin.dashboard.hour') : t('admin.dashboard.day'))
-const totalAccountCost = computed(() => Number(usageStats.value?.total_account_cost ?? usageStats.value?.total_actual_cost ?? 0))
 
 const getSingleQueryValue = (value: string | null | Array<string | null> | undefined): string | undefined => {
   if (Array.isArray(value)) return value.find((item): item is string => typeof item === 'string' && item.length > 0)
@@ -622,20 +497,6 @@ const visibleColumns = computed(() =>
     ALWAYS_VISIBLE.includes(col.key) || !hiddenColumns.has(col.key)
   )
 )
-const visibleColumnsCount = computed(() => visibleColumns.value.length)
-const activeFilterCount = computed(() => {
-  const currentFilters = filters.value
-
-  return [
-    currentFilters.user_id,
-    currentFilters.api_key_id,
-    currentFilters.account_id,
-    currentFilters.model,
-    currentFilters.group_id,
-    currentFilters.request_type,
-    currentFilters.billing_type
-  ].filter((value) => value !== undefined && value !== null && value !== '').length
-})
 
 const isColumnVisible = (key: string) => !hiddenColumns.has(key)
 

@@ -1,21 +1,9 @@
 <template>
-  <div
-    :class="embedded
-      ? 'rounded-[24px] border border-slate-200/80 bg-white/85 p-3 shadow-sm dark:border-dark-700 dark:bg-dark-900/70'
-      : 'card p-6'"
-  >
+  <div class="card p-6">
     <!-- Toolbar: left filters (multi-line) + right actions -->
-    <div
-      :class="embedded
-        ? 'flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between'
-        : 'flex flex-wrap items-end justify-between gap-4'"
-    >
+    <div class="flex flex-wrap items-end justify-between gap-4">
       <!-- Left: filters (allowed to wrap to multiple rows) -->
-      <div
-        :class="embedded
-          ? 'flex flex-1 flex-wrap items-end gap-3 rounded-[22px] border border-slate-200/80 bg-slate-50/80 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:border-dark-700 dark:bg-dark-800/70'
-          : 'flex flex-1 flex-wrap items-end gap-4'"
-      >
+      <div class="flex flex-1 flex-wrap items-end gap-4">
         <!-- User Search -->
         <div ref="userSearchRef" class="usage-filter-dropdown relative w-full sm:w-auto sm:min-w-[240px]">
           <label class="input-label">{{ t('admin.usage.userFilter') }}</label>
@@ -154,12 +142,7 @@
       </div>
 
       <!-- Right: actions -->
-      <div
-        v-if="showActions"
-        :class="embedded
-          ? 'flex w-full flex-wrap items-center justify-end gap-2 rounded-[22px] border border-slate-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/80 xl:w-auto'
-          : 'flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto'"
-      >
+      <div v-if="showActions" class="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto">
         <button type="button" @click="$emit('refresh')" class="btn btn-secondary">
           {{ t('common.refresh') }}
         </button>
@@ -193,12 +176,10 @@ interface Props {
   startDate: string
   endDate: string
   showActions?: boolean
-  embedded?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showActions: true,
-  embedded: false
+  showActions: true
 })
 const emit = defineEmits([
   'update:modelValue',

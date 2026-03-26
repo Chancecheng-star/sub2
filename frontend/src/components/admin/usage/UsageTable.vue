@@ -1,5 +1,5 @@
 <template>
-  <div :class="embedded ? 'min-w-0' : 'card overflow-hidden'">
+  <div class="card overflow-hidden">
     <div class="overflow-auto">
       <DataTable :columns="columns" :data="data" :loading="loading">
         <template #cell-user="{ row }">
@@ -316,19 +316,11 @@ import { formatTokenPricePerMillion } from '@/utils/usagePricing'
 import { getUsageServiceTierLabel } from '@/utils/usageServiceTier'
 import { resolveUsageRequestType } from '@/utils/usageRequestType'
 import DataTable from '@/components/common/DataTable.vue'
-import type { Column } from '@/components/common/types'
 import EmptyState from '@/components/common/EmptyState.vue'
 import Icon from '@/components/icons/Icon.vue'
 import type { AdminUsageLog } from '@/types'
 
-withDefaults(defineProps<{
-  data: AdminUsageLog[]
-  loading: boolean
-  columns: Column[]
-  embedded?: boolean
-}>(), {
-  embedded: false
-})
+defineProps(['data', 'loading', 'columns'])
 defineEmits(['userClick'])
 const { t } = useI18n()
 
