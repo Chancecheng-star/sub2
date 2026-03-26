@@ -1,6 +1,35 @@
 <template>
   <AppLayout>
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div class="mx-auto max-w-5xl space-y-6">
+      <div class="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-white via-violet-50/80 to-sky-50/70 p-5 shadow-[0_24px_80px_rgba(99,102,241,0.12)] dark:border-white/10 dark:from-dark-900 dark:via-dark-900 dark:to-dark-800 md:p-7">
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.18),transparent_58%)]"></div>
+        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div class="max-w-3xl">
+            <div class="mb-3 inline-flex items-center rounded-full border border-violet-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 shadow-sm dark:border-violet-800/60 dark:bg-dark-800/80 dark:text-violet-300">
+              System Settings
+            </div>
+            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-[2rem]">
+              网关、安全、策略与系统行为统一配置中心
+            </h2>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300 md:text-base">
+              这里承接后台的核心设置项。当前改造重点放�?tab 导航、设置卡片容器、状态提示与表单区块层级，让系统设置页也进入统一�?Mandal 风格�?            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Sections</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ settingsTabs.length }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Active</div>
+              <div class="mt-2 text-sm font-semibold capitalize text-slate-900 dark:text-white">{{ activeTab }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80 col-span-2 sm:col-span-1">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Mode</div>
+              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">Policy & gateway controls</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-600"></div>
@@ -9,7 +38,7 @@
       <!-- Settings Form -->
       <form v-else @submit.prevent="saveSettings" class="space-y-6" novalidate>
         <!-- Tab Navigation -->
-        <div class="sticky top-0 z-10 overflow-x-auto settings-tabs-scroll">
+        <div class="sticky top-0 z-10 overflow-x-auto rounded-[24px] border border-white/70 bg-white/80 p-2 shadow-[0_18px_50px_rgba(148,163,184,0.16)] backdrop-blur-xl dark:border-white/10 dark:bg-dark-900/80 settings-tabs-scroll">
           <nav class="settings-tabs">
             <button
               v-for="tab in settingsTabs"
@@ -26,10 +55,10 @@
           </nav>
         </div>
 
-        <!-- Tab: Security — Admin API Key -->
+        <!-- Tab: Security �?Admin API Key -->
         <div v-show="activeTab === 'security'" class="space-y-6">
         <!-- Admin API Key Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.adminApiKey.title') }}
@@ -166,13 +195,13 @@
             </div>
           </div>
         </div>
-        </div><!-- /Tab: Security — Admin API Key -->
+        </div><!-- /Tab: Security �?Admin API Key -->
 
         <!-- Tab: Gateway -->
         <div v-show="activeTab === 'gateway'" class="space-y-6">
 
         <!-- Overload Cooldown (529) Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.overloadCooldown.title') }}
@@ -256,7 +285,7 @@
         </div>
 
         <!-- Stream Timeout Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.streamTimeout.title') }}
@@ -394,7 +423,7 @@
         </div>
 
         <!-- Request Rectifier Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.rectifier.title') }}
@@ -491,7 +520,7 @@
           </div>
         </div>
         <!-- Beta Policy Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.betaPolicy.title') }}
@@ -603,10 +632,10 @@
 
         </div><!-- /Tab: Gateway -->
 
-        <!-- Tab: Security — Registration, Turnstile, LinuxDo -->
+        <!-- Tab: Security �?Registration, Turnstile, LinuxDo -->
         <div v-show="activeTab === 'security'" class="space-y-6">
         <!-- Registration Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.registration.title') }}
@@ -785,7 +814,7 @@
         </div>
 
         <!-- Cloudflare Turnstile Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.turnstile.title') }}
@@ -858,7 +887,7 @@
         </div>
 
         <!-- LinuxDo Connect OAuth 登录 -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.linuxdo.title') }}
@@ -956,12 +985,12 @@
             </div>
           </div>
         </div>
-        </div><!-- /Tab: Security — Registration, Turnstile, LinuxDo -->
+        </div><!-- /Tab: Security �?Registration, Turnstile, LinuxDo -->
 
         <!-- Tab: Users -->
         <div v-show="activeTab === 'users'" class="space-y-6">
         <!-- Default Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.defaults.title') }}
@@ -1100,10 +1129,10 @@
         </div>
         </div><!-- /Tab: Users -->
 
-        <!-- Tab: Gateway — Claude Code, Scheduling -->
+        <!-- Tab: Gateway �?Claude Code, Scheduling -->
         <div v-show="activeTab === 'gateway'" class="space-y-6">
         <!-- Claude Code Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.claudeCode.title') }}
@@ -1145,7 +1174,7 @@
         </div>
 
         <!-- Gateway Scheduling Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.scheduling.title') }}
@@ -1171,12 +1200,12 @@
             </div>
           </div>
         </div>
-        </div><!-- /Tab: Gateway — Claude Code, Scheduling -->
+        </div><!-- /Tab: Gateway �?Claude Code, Scheduling -->
 
         <!-- Tab: General -->
         <div v-show="activeTab === 'general'" class="space-y-6">
         <!-- Site Settings -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.site.title') }}
@@ -1333,7 +1362,7 @@
         </div>
 
         <!-- Purchase Subscription Page -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.purchase.title') }}
@@ -1389,7 +1418,7 @@
               >
                 {{ t('admin.settings.purchase.integrationDoc') }}
               </a>
-              <span class="text-gray-400 dark:text-gray-500">—</span>
+              <span class="text-gray-400 dark:text-gray-500">·</span>
               <span class="text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.settings.purchase.integrationDocHint') }}
               </span>
@@ -1398,7 +1427,7 @@
         </div>
 
         <!-- Sora Client Toggle -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.soraClient.title') }}
@@ -1423,7 +1452,7 @@
         </div>
 
         <!-- Custom Menu Items -->
-        <div class="card">
+        <div class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.customMenu.title') }}
@@ -1548,7 +1577,7 @@
         <!-- Tab: Email -->
         <div v-show="activeTab === 'email'" class="space-y-6">
         <!-- Email disabled hint - show when email_verify_enabled is off -->
-        <div v-if="!form.email_verify_enabled" class="card">
+        <div v-if="!form.email_verify_enabled" class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="p-6">
             <div class="flex items-start gap-3">
               <Icon name="mail" size="md" class="mt-0.5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
@@ -1565,7 +1594,7 @@
         </div>
 
         <!-- SMTP Settings - Only show when email verification is enabled -->
-        <div v-if="form.email_verify_enabled" class="card">
+        <div v-if="form.email_verify_enabled" class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div
             class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-dark-700"
           >
@@ -1707,7 +1736,7 @@
         </div>
 
         <!-- Send Test Email - Only show when email verification is enabled -->
-        <div v-if="form.email_verify_enabled" class="card">
+        <div v-if="form.email_verify_enabled" class="glass-card rounded-[26px] border border-white/70 bg-white/85 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ t('admin.settings.testEmail.title') }}
@@ -2198,7 +2227,7 @@ async function saveSettings() {
       return
     }
 
-    // Validate URL fields — novalidate disables browser-native checks, so we validate here
+    // Validate URL fields �?novalidate disables browser-native checks, so we validate here
     const isValidHttpUrl = (url: string): boolean => {
       if (!url) return true
       try {
@@ -2662,3 +2691,4 @@ onMounted(() => {
          dark:bg-primary-400/15 dark:text-primary-400;
 }
 </style>
+

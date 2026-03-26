@@ -9,12 +9,12 @@
     <!-- Logo/Brand -->
     <div class="sidebar-header">
       <!-- Custom Logo or Default Logo -->
-      <div class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-glow">
+      <div class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-primary-500/15 via-accent-400/10 to-pink-300/15 shadow-glow ring-1 ring-white/70">
         <img v-if="settingsLoaded" :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
       </div>
       <transition name="fade">
         <div v-if="!sidebarCollapsed" class="flex flex-col">
-          <span class="text-lg font-bold text-gray-900 dark:text-white">
+          <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
             {{ siteName }}
           </span>
           <!-- Version Badge -->
@@ -60,7 +60,7 @@
           <div v-if="!sidebarCollapsed" class="sidebar-section-title">
             {{ t('nav.myAccount') }}
           </div>
-          <div v-else class="mx-3 my-3 h-px bg-gray-200 dark:bg-dark-700"></div>
+          <div v-else class="mx-3 my-4 h-px bg-gradient-to-r from-transparent via-primary-200 to-transparent dark:via-dark-700"></div>
 
           <router-link
             v-for="item in personalNavItems"
@@ -105,7 +105,7 @@
     </nav>
 
     <!-- Bottom Section -->
-    <div class="mt-auto border-t border-gray-100 p-3 dark:border-dark-800">
+    <div class="mt-auto border-t border-white/70 p-3 dark:border-dark-800">
       <!-- Theme Toggle -->
       <button
         @click="toggleTheme"

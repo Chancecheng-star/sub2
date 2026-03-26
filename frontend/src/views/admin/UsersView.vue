@@ -1,13 +1,45 @@
 <template>
   <AppLayout>
+    <div class="mb-6 space-y-4">
+      <div class="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-white via-violet-50/80 to-fuchsia-50/70 p-5 shadow-[0_24px_80px_rgba(99,102,241,0.12)] dark:border-white/10 dark:from-dark-900 dark:via-dark-900 dark:to-dark-800 md:p-7">
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.18),transparent_58%)]"></div>
+        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div class="max-w-3xl">
+            <div class="mb-3 inline-flex items-center rounded-full border border-violet-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 shadow-sm dark:border-violet-800/60 dark:bg-dark-800/80 dark:text-violet-300">
+              User Control Center
+            </div>
+            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-[2rem]">
+              用户、权限、余额与订阅关系统一管理
+            </h2>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300 md:text-base">
+              这一页重点承接用户管理后台的搜索、筛选、权限操作与余额动作，视觉上继续向 Mandal 的管理面板节奏收拢。
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Users</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ pagination.total }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Visible filters</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ visibleFilters.size }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80 col-span-2 sm:col-span-1">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Columns</div>
+              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ columns.length }} visible</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <TablePageLayout>
       <!-- Single Row: Search, Filters, and Actions -->
       <template #filters>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <!-- Left: Search + Active Filters -->
-          <div class="flex flex-1 flex-wrap items-center gap-3">
+          <div class="flex flex-1 flex-wrap items-center gap-3 rounded-[22px] border border-slate-200/80 bg-slate-50/80 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] dark:border-dark-700 dark:bg-dark-800/70">
             <!-- Search Box -->
-            <div class="relative w-full md:w-64">
+            <div class="relative w-full md:w-72">
               <Icon
                 name="search"
                 size="md"
@@ -23,7 +55,7 @@
             </div>
 
             <!-- Role Filter (visible when enabled) -->
-            <div v-if="visibleFilters.has('role')" class="w-full sm:w-32">
+            <div v-if="visibleFilters.has('role')" class="w-full sm:w-36">
               <Select
                 v-model="filters.role"
                 :options="[
@@ -36,7 +68,7 @@
             </div>
 
             <!-- Status Filter (visible when enabled) -->
-            <div v-if="visibleFilters.has('status')" class="w-full sm:w-32">
+            <div v-if="visibleFilters.has('status')" class="w-full sm:w-36">
               <Select
                 v-model="filters.status"
                 :options="[
@@ -49,7 +81,7 @@
             </div>
 
             <!-- Group Filter (visible when enabled) -->
-            <div v-if="visibleFilters.has('group')" class="w-full sm:w-44">
+            <div v-if="visibleFilters.has('group')" class="w-full sm:w-48">
               <Select
                 v-model="filters.group"
                 :options="groupFilterOptions"
@@ -65,9 +97,8 @@
             <template v-for="(value, attrId) in activeAttributeFilters" :key="attrId">
               <div
                 v-if="visibleFilters.has(`attr_${attrId}`)"
-                class="relative w-full sm:w-36"
+                class="relative w-full sm:w-40"
               >
-                <!-- Text/Email/URL/Textarea/Date type: styled input -->
                 <input
                   v-if="['text', 'textarea', 'email', 'url', 'date'].includes(getAttributeDefinition(Number(attrId))?.type || 'text')"
                   :value="value"
@@ -76,7 +107,6 @@
                   :placeholder="getAttributeDefinitionName(Number(attrId))"
                   class="input w-full"
                 />
-                <!-- Number type: number input -->
                 <input
                   v-else-if="getAttributeDefinition(Number(attrId))?.type === 'number'"
                   :value="value"
@@ -86,7 +116,6 @@
                   :placeholder="getAttributeDefinitionName(Number(attrId))"
                   class="input w-full"
                 />
-                <!-- Select/Multi-select type -->
                 <template v-else-if="['select', 'multi_select'].includes(getAttributeDefinition(Number(attrId))?.type || '')">
                   <div class="w-full">
                     <Select
@@ -99,7 +128,6 @@
                     />
                   </div>
                 </template>
-                <!-- Fallback -->
                 <input
                   v-else
                   :value="value"
@@ -113,10 +141,8 @@
           </div>
 
           <!-- Right: Actions and Settings -->
-          <div class="flex flex-wrap items-center justify-end gap-2">
-            <!-- Mobile: Secondary buttons (icon only) -->
+          <div class="flex flex-wrap items-center justify-end gap-2 rounded-[22px] border border-slate-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/80 xl:max-w-[420px]">
             <div class="flex items-center gap-2 md:contents">
-              <!-- Refresh Button -->
               <button
                 @click="loadUsers"
                 :disabled="loading"
@@ -125,7 +151,6 @@
               >
                 <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
               </button>
-              <!-- Filter Settings Dropdown -->
               <div class="relative" ref="filterDropdownRef">
                 <button
                   @click="showFilterDropdown = !showFilterDropdown"
@@ -135,17 +160,16 @@
                   <Icon name="filter" size="sm" class="md:mr-1.5" />
                   <span class="hidden md:inline">{{ t('admin.users.filterSettings') }}</span>
                 </button>
-                <!-- Dropdown menu -->
                 <div
                   v-if="showFilterDropdown"
-                  class="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-dark-600 dark:bg-dark-800"
+                  class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 py-2 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-dark-600 dark:bg-dark-800/95"
                 >
-                  <!-- Built-in filters -->
+                  <div class="px-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Filters</div>
                   <button
                     v-for="filter in builtInFilters"
                     :key="filter.key"
                     @click="toggleBuiltInFilter(filter.key)"
-                    class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                    class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
                   >
                     <span>{{ filter.name }}</span>
                     <Icon
@@ -156,17 +180,15 @@
                       :stroke-width="2"
                     />
                   </button>
-                  <!-- Divider if custom attributes exist -->
                   <div
                     v-if="filterableAttributes.length > 0"
-                    class="my-1 border-t border-gray-100 dark:border-dark-700"
+                    class="my-2 border-t border-slate-100 dark:border-dark-700"
                   ></div>
-                  <!-- Custom attribute filters -->
                   <button
                     v-for="attr in filterableAttributes"
                     :key="attr.id"
                     @click="toggleAttributeFilter(attr)"
-                    class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                    class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
                   >
                     <span>{{ attr.name }}</span>
                     <Icon
@@ -179,7 +201,6 @@
                   </button>
                 </div>
               </div>
-              <!-- Column Settings Dropdown -->
               <div class="relative" ref="columnDropdownRef">
                 <button
                   @click="showColumnDropdown = !showColumnDropdown"
@@ -191,16 +212,16 @@
                   </svg>
                   <span class="hidden md:inline">{{ t('admin.users.columnSettings') }}</span>
                 </button>
-                <!-- Dropdown menu -->
                 <div
                   v-if="showColumnDropdown"
-                  class="absolute right-0 top-full z-50 mt-1 max-h-80 w-48 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-dark-600 dark:bg-dark-800"
+                  class="absolute right-0 top-full z-50 mt-2 max-h-80 w-56 overflow-y-auto rounded-2xl border border-slate-200 bg-white/95 py-2 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-dark-600 dark:bg-dark-800/95"
                 >
+                  <div class="px-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Columns</div>
                   <button
                     v-for="col in toggleableColumns"
                     :key="col.key"
                     @click="toggleColumn(col.key)"
-                    class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                    class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
                   >
                     <span>{{ col.label }}</span>
                     <Icon
@@ -213,7 +234,6 @@
                   </button>
                 </div>
               </div>
-              <!-- Attributes Config Button -->
               <button
                 @click="showAttributesModal = true"
                 class="btn btn-secondary px-2 md:px-3"
@@ -224,8 +244,7 @@
               </button>
             </div>
 
-            <!-- Create User Button (full width on mobile, auto width on desktop) -->
-            <button @click="showCreateModal = true" class="btn btn-primary flex-1 md:flex-initial">
+            <button @click="showCreateModal = true" class="btn btn-primary flex-1 shadow-glow md:flex-initial">
               <Icon name="plus" size="md" class="mr-2" />
               {{ t('admin.users.createUser') }}
             </button>
@@ -428,14 +447,21 @@
           </template>
 
           <template #cell-status="{ value }">
-            <div class="flex items-center gap-1.5">
+            <div
+              :class="[
+                'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]',
+                value === 'active'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300'
+                  : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-300'
+              ]"
+            >
               <span
                 :class="[
                   'inline-block h-2 w-2 rounded-full',
-                  value === 'active' ? 'bg-green-500' : 'bg-red-500'
+                  value === 'active' ? 'bg-emerald-500' : 'bg-rose-500'
                 ]"
               ></span>
-              <span class="text-sm text-gray-700 dark:text-gray-300">
+              <span>
                 {{ value === 'active' ? t('common.active') : t('admin.users.disabled') }}
               </span>
             </div>
@@ -446,40 +472,37 @@
           </template>
 
           <template #cell-actions="{ row }">
-            <div class="flex items-center gap-1">
-              <!-- Edit Button -->
+            <div class="flex items-center gap-2">
               <button
                 @click="handleEdit(row)"
-                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-dark-700 dark:hover:text-primary-400"
+                class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:text-primary-600 hover:shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200 dark:hover:border-primary-700 dark:hover:text-primary-300"
               >
                 <Icon name="edit" size="sm" />
-                <span class="text-xs">{{ t('common.edit') }}</span>
+                <span>{{ t('common.edit') }}</span>
               </button>
 
-              <!-- Toggle Status Button (not for admin) -->
               <button
                 v-if="row.role !== 'admin'"
                 @click="handleToggleStatus(row)"
                 :class="[
-                  'flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors',
+                  'inline-flex items-center gap-1 rounded-xl border px-2.5 py-2 text-xs font-medium transition-all hover:-translate-y-0.5 hover:shadow-sm',
                   row.status === 'active'
-                    ? 'hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/20 dark:hover:text-orange-400'
-                    : 'hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-900/20 dark:hover:text-green-400'
+                    ? 'border-orange-100 bg-orange-50/80 text-orange-600 dark:border-orange-900/30 dark:bg-orange-900/10 dark:text-orange-300'
+                    : 'border-emerald-100 bg-emerald-50/80 text-emerald-600 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-300'
                 ]"
               >
                 <Icon v-if="row.status === 'active'" name="ban" size="sm" />
                 <Icon v-else name="checkCircle" size="sm" />
-                <span class="text-xs">{{ row.status === 'active' ? t('admin.users.disable') : t('admin.users.enable') }}</span>
+                <span>{{ row.status === 'active' ? t('admin.users.disable') : t('admin.users.enable') }}</span>
               </button>
 
-              <!-- More Actions Menu Trigger -->
               <button
                 @click="openActionMenu(row, $event)"
-                class="action-menu-trigger flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-dark-700 dark:hover:text-white"
-                :class="{ 'bg-gray-100 text-gray-900 dark:bg-dark-700 dark:text-white': activeMenuId === row.id }"
+                class="action-menu-trigger inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200 dark:hover:text-white"
+                :class="{ 'border-slate-300 text-slate-900 shadow-sm dark:border-dark-500 dark:text-white': activeMenuId === row.id }"
               >
                 <Icon name="more" size="sm" />
-                <span class="text-xs">{{ t('common.more') }}</span>
+                <span>{{ t('common.more') }}</span>
               </button>
             </div>
           </template>
@@ -512,45 +535,44 @@
     <Teleport to="body">
       <div
         v-if="activeMenuId !== null && menuPosition"
-        class="action-menu-content fixed z-[9999] w-48 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5 dark:bg-dark-800 dark:ring-white/10"
+        class="action-menu-content fixed z-[9999] w-60 overflow-hidden rounded-[22px] border border-slate-200 bg-white/95 shadow-[0_24px_60px_rgba(15,23,42,0.16)] ring-1 ring-black/5 backdrop-blur-xl dark:border-dark-700 dark:bg-dark-800/95 dark:ring-white/10"
         :style="{ top: menuPosition.top + 'px', left: menuPosition.left + 'px' }"
       >
-        <div class="py-1">
+        <div class="px-4 pb-2 pt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">
+          User actions
+        </div>
+        <div class="pb-2">
           <template v-for="user in users" :key="user.id">
             <template v-if="user.id === activeMenuId">
-              <!-- View API Keys -->
               <button
                 @click="handleViewApiKeys(user); closeActionMenu()"
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
               >
                 <Icon name="key" size="sm" class="text-gray-400" :stroke-width="2" />
                 {{ t('admin.users.apiKeys') }}
               </button>
 
-              <!-- Allowed Groups -->
               <button
                 @click="handleAllowedGroups(user); closeActionMenu()"
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
               >
                 <Icon name="users" size="sm" class="text-gray-400" :stroke-width="2" />
                 {{ t('admin.users.groups') }}
               </button>
 
-              <div class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
+              <div class="my-2 border-t border-slate-100 dark:border-dark-700"></div>
 
-              <!-- Deposit -->
               <button
                 @click="handleDeposit(user); closeActionMenu()"
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
               >
                 <Icon name="plus" size="sm" class="text-emerald-500" :stroke-width="2" />
                 {{ t('admin.users.deposit') }}
               </button>
 
-              <!-- Withdraw -->
               <button
                 @click="handleWithdraw(user); closeActionMenu()"
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
               >
                 <svg class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
@@ -558,22 +580,20 @@
                 {{ t('admin.users.withdraw') }}
               </button>
 
-              <!-- Balance History -->
               <button
                 @click="handleBalanceHistory(user); closeActionMenu()"
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-dark-700"
               >
                 <Icon name="dollar" size="sm" class="text-gray-400" :stroke-width="2" />
                 {{ t('admin.users.balanceHistory') }}
               </button>
 
-              <div class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
+              <div class="my-2 border-t border-slate-100 dark:border-dark-700"></div>
 
-              <!-- Delete (not for admin) -->
               <button
                 v-if="user.role !== 'admin'"
                 @click="handleDelete(user); closeActionMenu()"
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
               >
                 <Icon name="trash" size="sm" :stroke-width="2" />
                 {{ t('common.delete') }}

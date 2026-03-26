@@ -1,8 +1,7 @@
 <template>
-  <div class="empty-state">
-    <!-- Icon -->
+  <div class="empty-state rounded-[28px] border border-white/70 bg-white/85 px-6 py-10 shadow-[0_18px_50px_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-dark-900/80">
     <div
-      class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gray-100 dark:bg-dark-800"
+      class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[24px] border border-primary-100 bg-gradient-to-br from-primary-50 to-sky-50 text-primary-500 shadow-sm dark:border-primary-900/30 dark:from-primary-900/20 dark:to-dark-800"
     >
       <slot name="icon">
         <component v-if="icon" :is="icon" class="empty-state-icon h-10 w-10" aria-hidden="true" />
@@ -23,17 +22,14 @@
       </slot>
     </div>
 
-    <!-- Title -->
-    <h3 class="empty-state-title">
+    <h3 class="empty-state-title text-slate-900 dark:text-white">
       {{ displayTitle }}
     </h3>
 
-    <!-- Description -->
-    <p class="empty-state-description">
+    <p class="empty-state-description mx-auto max-w-md text-slate-500 dark:text-dark-300">
       {{ description }}
     </p>
 
-    <!-- Action -->
     <div v-if="actionText || $slots.action" class="mt-6">
       <slot name="action">
         <component
@@ -41,7 +37,7 @@
           v-if="actionText"
           :to="actionTo"
           @click="!actionTo && $emit('action')"
-          class="btn btn-primary"
+          class="btn btn-primary shadow-glow"
         >
           <Icon v-if="actionIcon" name="plus" size="md" class="mr-2" />
           {{ actionText }}

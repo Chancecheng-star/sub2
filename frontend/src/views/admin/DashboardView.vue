@@ -7,8 +7,58 @@
       </div>
 
       <template v-else-if="stats">
+        <section class="card relative overflow-hidden p-6 lg:p-8">
+          <div class="absolute inset-0 -z-10 bg-gradient-to-br from-primary-100/80 via-white to-accent-100/80 dark:from-primary-900/20 dark:via-dark-800 dark:to-accent-900/10"></div>
+          <div class="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)] lg:items-center">
+            <div>
+              <div class="mb-3 inline-flex items-center rounded-full border border-primary-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary-600 dark:border-primary-800 dark:bg-dark-800/80 dark:text-primary-300">
+                Overview Console
+              </div>
+              <h2 class="max-w-3xl text-3xl font-semibold tracking-tight text-gray-900 dark:text-white lg:text-4xl">
+                把账号、请求、用量和风险放到一张更清晰的运营总览里。
+              </h2>
+              <p class="mt-3 max-w-2xl text-sm leading-6 text-gray-600 dark:text-dark-300 lg:text-base">
+                这一版先把后台首页改成更轻、更像 SaaS 控制台的样子。你可以从这里快速看到账号健康度、请求规模、用户增长和最近用量趋势。
+              </p>
+
+              <div class="mt-6 flex flex-wrap gap-3">
+                <div class="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/70">
+                  <div class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-dark-500">健康账号</div>
+                  <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.normal_accounts }}</div>
+                </div>
+                <div class="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/70">
+                  <div class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-dark-500">异常账号</div>
+                  <div class="mt-1 text-2xl font-semibold text-rose-500 dark:text-rose-300">{{ stats.error_accounts }}</div>
+                </div>
+                <div class="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 shadow-sm dark:border-dark-700 dark:bg-dark-800/70">
+                  <div class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-dark-500">活跃用户</div>
+                  <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.active_users }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <div class="rounded-[24px] bg-gradient-to-br from-primary-500 via-primary-600 to-accent-500 p-5 text-white shadow-lg shadow-primary-500/20">
+                <div class="text-xs uppercase tracking-[0.22em] text-white/70">今日请求</div>
+                <div class="mt-3 text-3xl font-semibold">{{ formatNumber(stats.today_requests) }}</div>
+                <div class="mt-2 text-sm text-white/80">累计 {{ formatNumber(stats.total_requests) }} 次</div>
+              </div>
+              <div class="rounded-[24px] border border-white/70 bg-white/85 p-5 shadow-sm dark:border-dark-700 dark:bg-dark-800/75">
+                <div class="text-xs uppercase tracking-[0.22em] text-gray-400 dark:text-dark-500">今日 Token</div>
+                <div class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">{{ formatTokens(stats.today_tokens) }}</div>
+                <div class="mt-2 text-sm text-gray-500 dark:text-dark-400">实际成本 ${{ formatCost(stats.today_actual_cost) }}</div>
+              </div>
+              <div class="rounded-[24px] border border-white/70 bg-white/85 p-5 shadow-sm dark:border-dark-700 dark:bg-dark-800/75">
+                <div class="text-xs uppercase tracking-[0.22em] text-gray-400 dark:text-dark-500">响应速度</div>
+                <div class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white">{{ formatDuration(stats.average_duration_ms) }}</div>
+                <div class="mt-2 text-sm text-gray-500 dark:text-dark-400">吞吐 {{ formatTokens(stats.rpm) }} RPM</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Row 1: Core Stats -->
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <!-- Total API Keys -->
           <div class="card p-4">
             <div class="flex items-center gap-3">
@@ -207,7 +257,7 @@
         <!-- Charts Section -->
         <div class="space-y-6">
           <!-- Date Range Filter -->
-          <div class="card p-4">
+          <div class="card p-5">
             <div class="flex flex-wrap items-center gap-4">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -235,7 +285,7 @@
           </div>
 
           <!-- Charts Grid -->
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="grid grid-cols-1 gap-6 2xl:grid-cols-[1.1fr_0.9fr] lg:grid-cols-2">
             <ModelDistributionChart
               :model-stats="modelStats"
               :enable-ranking-view="true"
@@ -254,10 +304,15 @@
           </div>
 
           <!-- User Usage Trend (Full Width) -->
-          <div class="card p-4">
-            <h3 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
-              {{ t('admin.dashboard.recentUsage') }} (Top 12)
-            </h3>
+          <div class="card p-5">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                {{ t('admin.dashboard.recentUsage') }} (Top 12)
+              </h3>
+              <span class="rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-600 dark:bg-primary-900/20 dark:text-primary-300">
+                Last {{ granularity === 'hour' ? '24h' : 'period' }}
+              </span>
+            </div>
             <div class="h-64">
               <div v-if="userTrendLoading" class="flex h-full items-center justify-center">
                 <LoadingSpinner size="md" />

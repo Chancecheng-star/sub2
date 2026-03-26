@@ -4,40 +4,43 @@
       <!-- Backdrop: click anywhere outside to close -->
       <div class="fixed inset-0 z-[9998]" @click="emit('close')"></div>
       <div
-        class="action-menu-content fixed z-[9999] w-52 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5 dark:bg-dark-800"
+        class="action-menu-content fixed z-[9999] w-60 overflow-hidden rounded-[22px] border border-slate-200 bg-white/95 shadow-[0_24px_60px_rgba(15,23,42,0.16)] ring-1 ring-black/5 backdrop-blur-xl dark:border-dark-700 dark:bg-dark-800/95"
         :style="{ top: position.top + 'px', left: position.left + 'px' }"
         @click.stop
       >
-        <div class="py-1">
+        <div class="px-4 pb-2 pt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">
+          Account actions
+        </div>
+        <div class="pb-2">
           <template v-if="account">
-            <button @click="$emit('test', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-700">
+            <button @click="$emit('test', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-dark-700">
               <Icon name="play" size="sm" class="text-green-500" :stroke-width="2" />
               {{ t('admin.accounts.testConnection') }}
             </button>
-            <button @click="$emit('stats', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-700">
+            <button @click="$emit('stats', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-dark-700">
               <Icon name="chart" size="sm" class="text-indigo-500" />
               {{ t('admin.accounts.viewStats') }}
             </button>
-            <button @click="$emit('schedule', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-dark-700">
+            <button @click="$emit('schedule', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-dark-700">
               <Icon name="clock" size="sm" class="text-orange-500" />
               {{ t('admin.scheduledTests.schedule') }}
             </button>
             <template v-if="account.type === 'oauth' || account.type === 'setup-token'">
-              <button @click="$emit('reauth', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 dark:hover:bg-dark-700">
+              <button @click="$emit('reauth', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-blue-600 transition-colors hover:bg-slate-50 dark:hover:bg-dark-700">
                 <Icon name="link" size="sm" />
                 {{ t('admin.accounts.reAuthorize') }}
               </button>
-              <button @click="$emit('refresh-token', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-purple-600 hover:bg-gray-100 dark:hover:bg-dark-700">
+              <button @click="$emit('refresh-token', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-purple-600 transition-colors hover:bg-slate-50 dark:hover:bg-dark-700">
                 <Icon name="refresh" size="sm" />
                 {{ t('admin.accounts.refreshToken') }}
               </button>
             </template>
-            <div v-if="hasRecoverableState" class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
-            <button v-if="hasRecoverableState" @click="$emit('recover-state', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-emerald-600 hover:bg-gray-100 dark:hover:bg-dark-700">
+            <div v-if="hasRecoverableState || hasQuotaLimit" class="my-2 border-t border-slate-100 dark:border-dark-700"></div>
+            <button v-if="hasRecoverableState" @click="$emit('recover-state', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-emerald-600 transition-colors hover:bg-slate-50 dark:hover:bg-dark-700">
               <Icon name="sync" size="sm" />
               {{ t('admin.accounts.recoverState') }}
             </button>
-            <button v-if="hasQuotaLimit" @click="$emit('reset-quota', account); $emit('close')" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-teal-600 hover:bg-gray-100 dark:hover:bg-dark-700">
+            <button v-if="hasQuotaLimit" @click="$emit('reset-quota', account); $emit('close')" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-teal-600 transition-colors hover:bg-slate-50 dark:hover:bg-dark-700">
               <Icon name="refresh" size="sm" />
               {{ t('admin.accounts.resetQuota') }}
             </button>

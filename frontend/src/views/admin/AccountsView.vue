@@ -1,5 +1,41 @@
 <template>
   <AppLayout>
+    <div class="mb-6 space-y-4">
+      <div class="relative overflow-hidden rounded-[28px] border border-white/70 bg-gradient-to-br from-white via-indigo-50/80 to-sky-50/80 p-5 shadow-[0_24px_80px_rgba(99,102,241,0.12)] dark:border-white/10 dark:from-dark-900 dark:via-dark-900 dark:to-dark-800 md:p-7">
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.18),transparent_55%)]"></div>
+        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div class="max-w-3xl">
+            <div class="mb-3 inline-flex items-center rounded-full border border-primary-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary-700 shadow-sm dark:border-primary-800/60 dark:bg-dark-800/80 dark:text-primary-300">
+              Accounts Workspace
+            </div>
+            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-[2rem]">
+              统一管理账号池、状态同步与可调度能力
+            </h2>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-dark-300 md:text-base">
+              这里是账号运营主控台。当前页面优先强化筛选、批量操作、状态观察与表格浏览体验，风格参考 Mandal Admin Dashboard 做统一收口。
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Accounts</div>
+              <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{{ pagination.total }}</div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Refresh</div>
+              <div class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                {{ autoRefreshEnabled ? autoRefreshIntervalLabel(autoRefreshIntervalSeconds) : 'Manual only' }}
+              </div>
+            </div>
+            <div class="rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-dark-800/80 col-span-2 sm:col-span-1">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-dark-400">Pending sync</div>
+              <div class="mt-2 text-sm font-semibold" :class="hasPendingListSync ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-300'">
+                {{ hasPendingListSync ? 'Changes waiting' : 'Up to date' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <TablePageLayout>
       <template #filters>
         <div class="flex flex-wrap-reverse items-start justify-between gap-3">
@@ -119,11 +155,14 @@
         </div>
         <div
           v-if="hasPendingListSync"
-          class="mt-2 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-200"
+          class="mt-3 flex items-center justify-between rounded-[18px] border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-800 shadow-sm dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-200"
         >
-          <span>{{ t('admin.accounts.listPendingSyncHint') }}</span>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-500/90 dark:text-amber-300/80">Sync required</div>
+            <span>{{ t('admin.accounts.listPendingSyncHint') }}</span>
+          </div>
           <button
-            class="btn btn-secondary px-2 py-1 text-xs"
+            class="btn btn-secondary px-3 py-1.5 text-xs"
             @click="syncPendingListChanges"
           >
             {{ t('admin.accounts.listPendingSyncAction') }}
@@ -250,18 +289,18 @@
             </div>
           </template>
           <template #cell-actions="{ row }">
-            <div class="flex items-center gap-1">
-              <button @click="handleEdit(row)" class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-dark-700 dark:hover:text-primary-400">
+            <div class="flex items-center gap-2">
+              <button @click="handleEdit(row)" class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:text-primary-600 hover:shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200 dark:hover:border-primary-700 dark:hover:text-primary-300">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
-                <span class="text-xs">{{ t('common.edit') }}</span>
+                <span>{{ t('common.edit') }}</span>
               </button>
-              <button @click="handleDelete(row)" class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+              <button @click="handleDelete(row)" class="inline-flex items-center gap-1 rounded-xl border border-red-100 bg-red-50/80 px-2.5 py-2 text-xs font-medium text-red-600 transition-all hover:-translate-y-0.5 hover:bg-red-100 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                <span class="text-xs">{{ t('common.delete') }}</span>
+                <span>{{ t('common.delete') }}</span>
               </button>
-              <button @click="openMenu(row, $event)" class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-dark-700 dark:hover:text-white">
+              <button @click="openMenu(row, $event)" class="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium text-slate-600 transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 hover:shadow-sm dark:border-dark-700 dark:bg-dark-800 dark:text-dark-200 dark:hover:text-white">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
-                <span class="text-xs">{{ t('common.more') }}</span>
+                <span>{{ t('common.more') }}</span>
               </button>
             </div>
           </template>

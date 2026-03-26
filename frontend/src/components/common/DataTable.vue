@@ -35,7 +35,7 @@
       <div
         v-for="(row, index) in sortedData"
         :key="resolveRowKey(row, index)"
-        class="rounded-lg border border-gray-200 bg-white p-4 dark:border-dark-700 dark:bg-dark-900"
+        class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_10px_28px_rgba(148,163,184,0.12)] dark:border-dark-700 dark:bg-dark-900"
       >
         <div class="space-y-3">
           <div
@@ -673,11 +673,12 @@ defineExpose({
   position: sticky;
   top: 0;
   z-index: 200;
-  background-color: rgb(249 250 251);
+  background-color: rgba(248, 250, 252, 0.96);
+  backdrop-filter: blur(12px);
 }
 
 .dark .table-wrapper .table-header {
-  background-color: rgb(31 41 55);
+  background-color: rgba(31, 41, 55, 0.92);
 }
 
 /* 表体保持在表头下方 */
@@ -691,11 +692,12 @@ defineExpose({
   position: sticky;
   top: 0;
   z-index: 210; /* 必须高于所有表体内容 */
-  background-color: rgb(249 250 251);
+  background-color: rgba(248, 250, 252, 0.96);
+  backdrop-filter: blur(12px);
 }
 
 .dark .sticky-header-cell {
-  background-color: rgb(31 41 55);
+  background-color: rgba(31, 41, 55, 0.92);
 }
 
 /* Sticky 列基础样式 */
