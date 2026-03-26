@@ -2834,7 +2834,6 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import {
-  claudeModels,
   getPresetMappingsByPlatform,
   getModelsByPlatform,
   commonErrorCodes,
@@ -3243,19 +3242,10 @@ const canExchangeCode = computed(() => {
 // Watchers
 watch(
   () => props.show,
-  async (newVal) => {
+  (newVal) => {
     if (newVal) {
       // Modal opened - fill related models
-      if (form.platform === 'openai') {
-        try {
-          const models = await adminAPI.accounts.getModelsByPlatform('openai')
-          allowedModels.value = models.map((m: any) => m.id)
-        } catch {
-          allowedModels.value = [...getModelsByPlatform(form.platform)]
-        }
-      } else {
-        allowedModels.value = [...getModelsByPlatform(form.platform)]
-      }
+      allowedModels.value = [...getModelsByPlatform(form.platform)]
       // Antigravity: 默认使用映射模式并填充默认映射
       if (form.platform === 'antigravity') {
         antigravityModelRestrictionMode.value = 'mapping'
@@ -3305,7 +3295,7 @@ watch(
 // Reset platform-specific settings when platform changes
 watch(
   () => form.platform,
-  async (newPlatform) => {
+  (newPlatform) => {
     // Reset base URL based on platform
     apiKeyBaseUrl.value =
       (newPlatform === 'openai' || newPlatform === 'sora')
@@ -3315,16 +3305,7 @@ watch(
           : 'https://api.anthropic.com'
     // Clear model-related settings
     modelMappings.value = []
-    if (newPlatform === 'openai') {
-      try {
-        const models = await adminAPI.accounts.getModelsByPlatform('openai')
-        allowedModels.value = models.map((m: any) => m.id)
-      } catch {
-        allowedModels.value = [...getModelsByPlatform(newPlatform)]
-      }
-    } else {
-      allowedModels.value = [...getModelsByPlatform(newPlatform)]
-    }
+    allowedModels.value = [...getModelsByPlatform(newPlatform)]
     // Antigravity: 默认使用映射模式并填充默认映射
     if (newPlatform === 'antigravity') {
       antigravityModelRestrictionMode.value = 'mapping'
