@@ -1505,7 +1505,7 @@ func setDefaults() {
 	viper.SetDefault("token_refresh.sync_linked_sora_accounts", false) // 默认不跨平台覆盖 Sora token
 	viper.SetDefault("token_refresh.invalid_cleanup.enabled", true)
 	viper.SetDefault("token_refresh.invalid_cleanup.check_interval_minutes", 5)
-	viper.SetDefault("token_refresh.invalid_cleanup.grace_period_minutes", 60)
+	viper.SetDefault("token_refresh.invalid_cleanup.grace_period_minutes", 10)
 	viper.SetDefault("token_refresh.invalid_cleanup.dry_run", false)
 	viper.SetDefault("token_refresh.invalid_cleanup.match_keywords", []string{"401", "invalid_grant", "invalid_client", "unauthorized_client", "access_denied"})
 

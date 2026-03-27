@@ -259,8 +259,18 @@ func (r *accountRepository) ExistsByID(ctx context.Context, id int64) (bool, err
 
 func (r *accountRepository) ListInvalidAccountsForCleanup(ctx context.Context, before time.Time, matchKeywords []string) ([]service.Account, error) {
 	q := r.client.Account.Query().Where(
-		dbaccount.StatusEQ(service.StatusError),
 		dbaccount.UpdatedAtLTE(before),
+		dbaccount.Or(
+			dbaccount.StatusEQ(service.StatusError),
+			dbpredicate.Account(func(s *entsql.Selector) {
+				reasonCol := s.C("temp_unschedulable_reason")
+				untilCol := s.C("temp_unschedulable_until")
+				s.Where(entsql.And(
+					entsql.Not(entsql.IsNull(reasonCol)),
+					entsql.Not(entsql.IsNull(untilCol)),
+				))
+			}),
+		),
 	)
 
 	keywords := make([]dbpredicate.Account, 0, len(matchKeywords))
@@ -269,7 +279,13 @@ func (r *accountRepository) ListInvalidAccountsForCleanup(ctx context.Context, b
 		if keyword == "" {
 			continue
 		}
-		keywords = append(keywords, dbaccount.ErrorMessageContainsFold(keyword))
+		keywords = append(keywords,
+			dbaccount.ErrorMessageContainsFold(keyword),
+			dbpredicate.Account(func(s *entsql.Selector) {
+				col := s.C("temp_unschedulable_reason")
+				s.Where(entsql.ExprP("LOWER(COALESCE("+col+", '')) LIKE ?", "%"+strings.ToLower(keyword)+"%"))
+			}),
+		)
 	}
 	if len(keywords) > 0 {
 		q = q.Where(dbaccount.Or(keywords...))
