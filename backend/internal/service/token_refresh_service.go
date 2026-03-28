@@ -361,8 +361,25 @@ func (s *TokenRefreshService) postRefreshActions(ctx context.Context, account *A
 			slog.Info("token_refresh.cleared_missing_project_id_error", "account_id", account.ID)
 		}
 	}
-	// 刷新成功后清除临时不可调度状态（处理 OAuth 401 恢复场景）
+	// 刷新成功后清除临时不可调度状态（处理 OAuth 401 恢复场景）。
+	// 但若 reason 已明确指向 token_revoked / invalidated oauth token 这类不可逆失效，
+	// 则不允许恢复，直接删除，避免旧数据被错误捞回正常状态。
 	if account.TempUnschedulableUntil != nil && time.Now().Before(*account.TempUnschedulableUntil) {
+		if shouldDeleteImmediatelyForOAuth401(account.TempUnschedulableReason, account.ErrorMessage) {
+			if err := s.accountRepo.Delete(ctx, account.ID); err != nil {
+				slog.Warn("token_refresh.delete_irreversible_temp_unsched_account_failed",
+					"account_id", account.ID,
+					"reason", account.TempUnschedulableReason,
+					"error", err,
+				)
+			} else {
+				slog.Warn("token_refresh.deleted_irreversible_temp_unsched_account",
+					"account_id", account.ID,
+					"reason", account.TempUnschedulableReason,
+				)
+			}
+			return
+		}
 		if clearErr := s.accountRepo.ClearTempUnschedulable(ctx, account.ID); clearErr != nil {
 			slog.Warn("token_refresh.clear_temp_unschedulable_failed",
 				"account_id", account.ID,
