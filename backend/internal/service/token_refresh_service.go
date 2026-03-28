@@ -482,6 +482,19 @@ func (s *TokenRefreshService) ensureOpenAIPrivacy(ctx context.Context, account *
 	if mode == "" {
 		return
 	}
+	if mode == PrivacyModeAccountDeactivated {
+		if err := s.accountRepo.Delete(ctx, account.ID); err != nil {
+			slog.Warn("token_refresh.delete_deactivated_oauth_account_failed",
+				"account_id", account.ID,
+				"error", err,
+			)
+		} else {
+			slog.Warn("token_refresh.deleted_deactivated_oauth_account",
+				"account_id", account.ID,
+			)
+		}
+		return
+	}
 
 	if err := s.accountRepo.UpdateExtra(ctx, account.ID, map[string]any{"privacy_mode": mode}); err != nil {
 		slog.Warn("token_refresh.update_privacy_mode_failed",
