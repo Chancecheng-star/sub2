@@ -17,9 +17,10 @@ type PrivacyClientFactory func(proxyURL string) (*req.Client, error)
 const (
 	openAISettingsURL = "https://chatgpt.com/backend-api/settings/account_user_setting"
 
-	PrivacyModeTrainingOff = "training_off"
-	PrivacyModeFailed      = "training_set_failed"
-	PrivacyModeCFBlocked   = "training_set_cf_blocked"
+	PrivacyModeTrainingOff       = "training_off"
+	PrivacyModeFailed            = "training_set_failed"
+	PrivacyModeCFBlocked         = "training_set_cf_blocked"
+	PrivacyModeAccountDeactivated = "training_set_account_deactivated"
 )
 
 // disableOpenAITraining calls ChatGPT settings API to turn off "Improve the model for everyone".
@@ -60,8 +61,13 @@ func disableOpenAITraining(ctx context.Context, clientFactory PrivacyClientFacto
 		}
 	}
 
+	body := resp.String()
 	if !resp.IsSuccessState() {
-		slog.Warn("openai_privacy_failed", "status", resp.StatusCode, "body", truncate(resp.String(), 200))
+		if shouldDeleteImmediatelyForOAuth401(body) {
+			slog.Warn("openai_privacy_account_deactivated", "status", resp.StatusCode, "body", truncate(body, 200))
+			return PrivacyModeAccountDeactivated
+		}
+		slog.Warn("openai_privacy_failed", "status", resp.StatusCode, "body", truncate(body, 200))
 		return PrivacyModeFailed
 	}
 

@@ -636,7 +636,10 @@ func shouldDeleteImmediatelyForOAuth401(parts ...string) bool {
 		}
 		if strings.Contains(lower, "token_revoked") ||
 			strings.Contains(lower, "invalidated oauth token") ||
-			strings.Contains(lower, "encountered invalidated oauth token for user") {
+			strings.Contains(lower, "encountered invalidated oauth token for user") ||
+			strings.Contains(lower, "account has been deactivated") ||
+			strings.Contains(lower, "your openai account has been deactivated") ||
+			strings.Contains(lower, PrivacyModeAccountDeactivated) {
 			return true
 		}
 	}
