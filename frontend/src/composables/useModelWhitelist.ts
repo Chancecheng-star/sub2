@@ -231,6 +231,34 @@ const perplexityModels = [
   'llama-3-sonar-small-32k-chat', 'llama-3-sonar-large-32k-chat'
 ]
 
+// OpenAI 默认模型（导入账号时的默认白名单）
+export const openaiDefaultModels = [
+  // GPT-5.4 系列
+  'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.4-nano', 'gpt-5.4-2026-03-05',
+  // GPT-5.3 系列
+  'gpt-5.3-codex', 'gpt-5.3-codex-spark',
+  // GPT-5.2 系列
+  'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.2-pro',
+  // GPT-5.1 系列
+  'gpt-5.1', 'gpt-5.1-codex', 'gpt-5.1-codex-max', 'gpt-5.1-codex-mini',
+  // GPT-5 基础系列
+  'gpt-5', 'gpt-5-chat', 'gpt-5-chat-latest', 'gpt-5-codex', 'gpt-5-mini', 'gpt-5-nano',
+  // GPT-4o 系列
+  'gpt-4o', 'gpt-4o-2024-08-06', 'gpt-4o-2024-11-20',
+  'gpt-4o-mini', 'gpt-4o-mini-2024-07-18',
+  'gpt-4o-audio-preview', 'gpt-4o-realtime-preview',
+  // GPT-4.x 系列
+  'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.5-preview',
+  // GPT-4 基础系列
+  'gpt-4', 'gpt-4-turbo', 'gpt-4-turbo-preview',
+  // GPT-3.5 系列
+  'gpt-3.5-turbo', 'gpt-3.5-turbo-0125', 'gpt-3.5-turbo-1106', 'gpt-3.5-turbo-16k',
+  // o 系列
+  'o1', 'o1-preview', 'o1-mini', 'o1-pro', 'o3', 'o3-mini', 'o3-pro', 'o4-mini',
+  // chatgpt latest
+  'chatgpt-4o-latest'
+]
+
 // 所有模型（去重）
 const allModelsList: string[] = [
   ...openaiModels,
