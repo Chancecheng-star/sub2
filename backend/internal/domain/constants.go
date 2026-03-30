@@ -120,16 +120,16 @@ var DefaultAntigravityModelMapping = map[string]string{
 // 包含 GPT-5.x 全系列 + GPT-4o 系列 + o 系列
 var DefaultOpenAIModelMapping = map[string]string{
 	// GPT-5.4 系列
-	"gpt-5.4":              "gpt-5.4",
-	"gpt-5.4-mini":         "gpt-5.4-mini",
-	"gpt-5.4-nano":         "gpt-5.4-nano",
-	"gpt-5.4-2026-03-05":   "gpt-5.4-2026-03-05",
+	"gpt-5.4":            "gpt-5.4",
+	"gpt-5.4-mini":       "gpt-5.4-mini",
+	"gpt-5.4-nano":       "gpt-5.4-nano",
+	"gpt-5.4-2026-03-05": "gpt-5.4-2026-03-05",
 	// GPT-5.3 系列
-	"gpt-5.3-codex":        "gpt-5.3-codex",
-	"gpt-5.3-codex-spark":  "gpt-5.3-codex-spark",
+	"gpt-5.3-codex":     "gpt-5.3-codex",
+	"gpt-5.3-codex-spark": "gpt-5.3-codex-spark",
 	// GPT-5.2 系列
-	"gpt-5.2":              "gpt-5.2",
-	"gpt-5.2-codex":        "gpt-5.2-codex",
+	"gpt-5.2":       "gpt-5.2",
+	"gpt-5.2-codex": "gpt-5.2-codex",
 	"gpt-5.2-pro":          "gpt-5.2-pro",
 	// GPT-5.1 系列
 	"gpt-5.1":              "gpt-5.1",
