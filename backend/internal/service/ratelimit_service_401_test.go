@@ -17,6 +17,7 @@ type rateLimitAccountRepoStub struct {
 	mockAccountRepoForGemini
 	setErrorCalls int
 	tempCalls     int
+	deleteCalls   int
 	lastErrorMsg  string
 }
 
