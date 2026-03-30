@@ -132,10 +132,10 @@ var DefaultOpenAIModelMapping = map[string]string{
 	"gpt-5.2-codex": "gpt-5.2-codex",
 	"gpt-5.2-pro":     "gpt-5.2-pro",
 	// GPT-5.1 系列
-	"gpt-5.1":              "gpt-5.1",
-	"gpt-5.1-codex":        "gpt-5.1-codex",
-	"gpt-5.1-codex-max":    "gpt-5.1-codex-max",
-	"gpt-5.1-codex-mini":   "gpt-5.1-codex-mini",
+	"gpt-5.1":            "gpt-5.1",
+	"gpt-5.1-codex":      "gpt-5.1-codex",
+	"gpt-5.1-codex-max":  "gpt-5.1-codex-max",
+	"gpt-5.1-codex-mini": "gpt-5.1-codex-mini",
 	// GPT-5 基础系列
 	"gpt-5":                "gpt-5",
 	"gpt-5-chat":           "gpt-5-chat",
