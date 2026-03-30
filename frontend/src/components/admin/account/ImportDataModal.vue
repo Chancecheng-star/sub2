@@ -21,11 +21,13 @@
         <div
           class="flex items-center justify-between gap-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 dark:border-dark-600 dark:bg-dark-800"
         >
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <div class="truncate text-sm text-gray-700 dark:text-dark-200">
               {{ fileName || t('admin.accounts.dataImportSelectFile') }}
             </div>
-            <div class="text-xs text-gray-500 dark:text-dark-400">JSON (.json)</div>
+            <div class="text-xs text-gray-500 dark:text-dark-400">
+              {{ fileCount > 1 ? t('admin.accounts.dataImportFileCount', { count: fileCount }) : t('admin.accounts.dataImportFileHint') }}
+            </div>
           </div>
           <button type="button" class="btn btn-secondary shrink-0" @click="openFilePicker">
             {{ t('common.chooseFile') }}
@@ -36,6 +38,7 @@
           type="file"
           class="hidden"
           accept="application/json,.json"
+          multiple
           @change="handleFileChange"
         />
       </div>
@@ -136,7 +139,13 @@ const groups = ref<Array<{ id: string; name: string }>>([])
 const loadingGroups = ref(false)
 
 const fileInput = ref<HTMLInputElement | null>(null)
-const fileName = computed(() => file.value?.name || '')
+const files = ref<File[]>([])
+const fileName = computed(() => {
+  if (files.value.length === 0) return ''
+  if (files.value.length === 1) return files.value[0].name
+  return files.value.length > 0 ? `${files.value[0].name} +${files.value.length - 1} files` : ''
+})
+const fileCount = computed(() => files.value.length)
 
 const errorItems = computed(() => result.value?.errors || [])
 
@@ -157,7 +166,7 @@ watch(
   () => props.show,
   (open) => {
     if (open) {
-      file.value = null
+      files.value = []
       result.value = null
       selectedGroupId.value = ''
       if (fileInput.value) {
@@ -174,7 +183,7 @@ const openFilePicker = () => {
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
-  file.value = target.files?.[0] || null
+  files.value = Array.from(target.files || [])
 }
 
 const handleClose = () => {
@@ -201,43 +210,73 @@ const readFileAsText = async (sourceFile: File): Promise<string> => {
 }
 
 const handleImport = async () => {
-  if (!file.value) {
+  if (files.value.length === 0) {
     appStore.showError(t('admin.accounts.dataImportSelectFile'))
     return
   }
 
   importing.value = true
   try {
-    const text = await readFileAsText(file.value)
-    const dataPayload = JSON.parse(text)
+    const totalResult: AdminDataImportResult = {
+      account_created: 0,
+      account_failed: 0,
+      proxy_created: 0,
+      proxy_reused: 0,
+      proxy_failed: 0,
+      errors: []
+    }
 
-    const res = await adminAPI.accounts.importData({
-      data: dataPayload,
-      group_id: selectedGroupId.value || undefined,
-      skip_default_group_bind: !selectedGroupId.value
-    })
+    // 逐个文件导入
+    for (const sourceFile of files.value) {
+      try {
+        const text = await readFileAsText(sourceFile)
+        const dataPayload = JSON.parse(text)
 
-    result.value = res
+        const res = await adminAPI.accounts.importData({
+          data: dataPayload,
+          group_id: selectedGroupId.value || undefined,
+          skip_default_group_bind: !selectedGroupId.value
+        })
+
+        // 累加结果
+        totalResult.account_created += res.account_created
+        totalResult.account_failed += res.account_failed
+        totalResult.proxy_created += res.proxy_created
+        totalResult.proxy_reused += res.proxy_reused
+        totalResult.proxy_failed += res.proxy_failed
+        if (res.errors) {
+          totalResult.errors.push(...res.errors)
+        }
+      } catch (fileError: any) {
+        // 单个文件失败，记录错误继续下一个
+        totalResult.account_failed++
+        totalResult.errors.push({
+          kind: 'file',
+          name: sourceFile.name,
+          message: fileError instanceof SyntaxError 
+            ? t('admin.accounts.dataImportParseFailed') 
+            : (fileError?.message || t('admin.accounts.dataImportFailed'))
+        })
+      }
+    }
+
+    result.value = totalResult
 
     const msgParams: Record<string, unknown> = {
-      account_created: res.account_created,
-      account_failed: res.account_failed,
-      proxy_created: res.proxy_created,
-      proxy_reused: res.proxy_reused,
-      proxy_failed: res.proxy_failed,
+      account_created: totalResult.account_created,
+      account_failed: totalResult.account_failed,
+      proxy_created: totalResult.proxy_created,
+      proxy_reused: totalResult.proxy_reused,
+      proxy_failed: totalResult.proxy_failed,
     }
-    if (res.account_failed > 0 || res.proxy_failed > 0) {
+    if (totalResult.account_failed > 0 || totalResult.proxy_failed > 0) {
       appStore.showError(t('admin.accounts.dataImportCompletedWithErrors', msgParams))
     } else {
       appStore.showSuccess(t('admin.accounts.dataImportSuccess', msgParams))
       emit('imported')
     }
   } catch (error: any) {
-    if (error instanceof SyntaxError) {
-      appStore.showError(t('admin.accounts.dataImportParseFailed'))
-    } else {
-      appStore.showError(error?.message || t('admin.accounts.dataImportFailed'))
-    }
+    appStore.showError(error?.message || t('admin.accounts.dataImportFailed'))
   } finally {
     importing.value = false
   }
