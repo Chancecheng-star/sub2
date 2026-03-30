@@ -223,7 +223,7 @@ const handleImport = async () => {
       proxy_created: 0,
       proxy_reused: 0,
       proxy_failed: 0,
-      errors: []
+      errors: [] as any[]
     }
 
     // 逐个文件导入
@@ -244,7 +244,7 @@ const handleImport = async () => {
         totalResult.proxy_created += res.proxy_created || 0
         totalResult.proxy_reused += res.proxy_reused || 0
         totalResult.proxy_failed += res.proxy_failed || 0
-        if (res.errors) {
+        if (res.errors && Array.isArray(res.errors)) {
           totalResult.errors.push(...res.errors)
         }
       } catch (fileError: any) {
