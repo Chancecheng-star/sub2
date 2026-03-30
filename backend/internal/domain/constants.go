@@ -125,7 +125,7 @@ var DefaultOpenAIModelMapping = map[string]string{
 	"gpt-5.4-nano":       "gpt-5.4-nano",
 	"gpt-5.4-2026-03-05": "gpt-5.4-2026-03-05",
 	// GPT-5.3 系列
-	"gpt-5.3-codex":     "gpt-5.3-codex",
+	"gpt-5.3-codex":       "gpt-5.3-codex",
 	"gpt-5.3-codex-spark": "gpt-5.3-codex-spark",
 	// GPT-5.2 系列
 	"gpt-5.2":       "gpt-5.2",
