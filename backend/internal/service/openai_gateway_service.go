@@ -3047,7 +3047,7 @@ func (s *OpenAIGatewayService) handleErrorResponse(
 	if s.rateLimitService != nil {
 		shouldDisable = s.rateLimitService.HandleUpstreamError(ctx, account, resp.StatusCode, resp.Header, body)
 	}
-	
+
 	// ========== 即时删除逻辑（401/429）==========
 	if s.cfg != nil && s.cfg.TokenRefresh.ImmediateDelete.Enabled {
 		// 429 usage_limit_reached: 立即删除
@@ -3062,7 +3062,7 @@ func (s *OpenAIGatewayService) handleErrorResponse(
 				)
 			}
 		}
-		
+
 		// 401: 记录错误，连续 3 次后删除（通过 updated_at 和 error_message 判断）
 		if resp.StatusCode == 401 {
 			// 更新账号错误信息
@@ -3070,18 +3070,13 @@ func (s *OpenAIGatewayService) handleErrorResponse(
 			account.Status = "error"
 			account.UpdatedAt = time.Now()
 			_ = s.accountRepo.Update(ctx, account)
-			
-			// 检查是否连续 401（通过 updated_at 判断，10 分钟内连续 3 次）
-			threshold := s.cfg.TokenRefresh.ImmediateDelete.Error401Threshold
-			if threshold <= 0 {
-				threshold = 3
-			}
+
 			// TODO: 添加 error_count 字段后实现连续计数
 			// 暂时通过定时任务清理
 		}
 	}
 	// ===========================================
-	
+
 	kind := "http_error"
 	if shouldDisable {
 		kind = "failover"
@@ -3219,7 +3214,7 @@ func (s *OpenAIGatewayService) handleCompatErrorResponse(
 			c.Request.Context(), account, resp.StatusCode, resp.Header, body,
 		)
 	}
-	
+
 	// ========== 即时删除逻辑（401/429）==========
 	if s.cfg != nil && s.cfg.TokenRefresh.ImmediateDelete.Enabled {
 		// 429 usage_limit_reached: 立即删除
@@ -3234,7 +3229,7 @@ func (s *OpenAIGatewayService) handleCompatErrorResponse(
 				)
 			}
 		}
-		
+
 		// 401: 记录错误，连续 3 次后删除
 		if resp.StatusCode == 401 {
 			account.ErrorMessage = upstreamMsg
@@ -3244,7 +3239,7 @@ func (s *OpenAIGatewayService) handleCompatErrorResponse(
 		}
 	}
 	// ===========================================
-	
+
 	kind := "http_error"
 	if shouldDisable {
 		kind = "failover"

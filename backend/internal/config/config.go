@@ -1,4 +1,4 @@
-﻿// Package config provides configuration loading, defaults, and validation.
+// Package config provides configuration loading, defaults, and validation.
 package config
 
 import (
@@ -204,7 +204,6 @@ type TokenRefreshConfig struct {
 	// 即时删除配置（401/429 错误）
 	ImmediateDelete ImmediateDeleteConfig `mapstructure:"immediate_delete"`
 }
-
 
 // ImmediateDeleteConfig 即时删除配置（401/429 错误）
 type ImmediateDeleteConfig struct {
@@ -2418,6 +2417,3 @@ func warnIfInsecureURL(field, raw string) {
 		slog.Warn("url uses http scheme; use https in production to avoid token leakage", "field", field)
 	}
 }
-
-
-
