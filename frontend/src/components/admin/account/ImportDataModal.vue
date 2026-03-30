@@ -132,10 +132,9 @@ const { t } = useI18n()
 const appStore = useAppStore()
 
 const importing = ref(false)
-const file = ref<File | null>(null)
 const result = ref<AdminDataImportResult | null>(null)
 const selectedGroupId = ref<string>('')
-const groups = ref<Array<{ id: string; name: string }>>([])
+const groups = ref<any[]>([])
 const loadingGroups = ref(false)
 
 const fileInput = ref<HTMLInputElement | null>(null)
