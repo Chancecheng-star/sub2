@@ -223,7 +223,7 @@ const handleImport = async () => {
       proxy_created: 0,
       proxy_reused: 0,
       proxy_failed: 0,
-      errors: [] as any[]
+      errors: []
     }
 
     // 逐个文件导入
@@ -232,11 +232,11 @@ const handleImport = async () => {
         const text = await readFileAsText(sourceFile)
         const dataPayload = JSON.parse(text)
 
-        const res = await adminAPI.accounts.importData({
+        const res: any = await adminAPI.accounts.importData({
           data: dataPayload,
           group_id: selectedGroupId.value || undefined,
           skip_default_group_bind: !selectedGroupId.value
-        } as any)
+        })
 
         // 累加结果
         totalResult.account_created += res.account_created || 0
@@ -244,14 +244,14 @@ const handleImport = async () => {
         totalResult.proxy_created += res.proxy_created || 0
         totalResult.proxy_reused += res.proxy_reused || 0
         totalResult.proxy_failed += res.proxy_failed || 0
-        if (res.errors && Array.isArray(res.errors)) {
-          totalResult.errors.push(...res.errors)
+        if (res.errors) {
+          totalResult.errors = totalResult.errors.concat(res.errors)
         }
       } catch (fileError: any) {
         // 单个文件失败，记录错误继续下一个
         totalResult.account_failed++
         totalResult.errors.push({
-          kind: 'account' as any,
+          kind: 'account',
           name: sourceFile.name,
           message: fileError instanceof SyntaxError 
             ? t('admin.accounts.dataImportParseFailed') 
