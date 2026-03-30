@@ -144,12 +144,12 @@ var DefaultOpenAIModelMapping = map[string]string{
 	"gpt-5-mini":        "gpt-5-mini",
 	"gpt-5-nano":        "gpt-5-nano",
 	// GPT-4o 系列
-	"gpt-4o":                 "gpt-4o",
-	"gpt-4o-2024-08-06":      "gpt-4o-2024-08-06",
-	"gpt-4o-2024-11-20":      "gpt-4o-2024-11-20",
-	"gpt-4o-mini":            "gpt-4o-mini",
-	"gpt-4o-mini-2024-07-18": "gpt-4o-mini-2024-07-18",
-	"gpt-4o-audio-preview":   "gpt-4o-audio-preview",
+	"gpt-4o":                  "gpt-4o",
+	"gpt-4o-2024-08-06":       "gpt-4o-2024-08-06",
+	"gpt-4o-2024-11-20":       "gpt-4o-2024-11-20",
+	"gpt-4o-mini":             "gpt-4o-mini",
+	"gpt-4o-mini-2024-07-18":  "gpt-4o-mini-2024-07-18",
+	"gpt-4o-audio-preview":    "gpt-4o-audio-preview",
 	"gpt-4o-realtime-preview": "gpt-4o-realtime-preview",
 	// GPT-4.x 系列
 	"gpt-4.1":         "gpt-4.1",
@@ -161,21 +161,21 @@ var DefaultOpenAIModelMapping = map[string]string{
 	"gpt-4-turbo":         "gpt-4-turbo",
 	"gpt-4-turbo-preview": "gpt-4-turbo-preview",
 	// GPT-3.5 系列
-	"gpt-3.5-turbo":          "gpt-3.5-turbo",
-	"gpt-3.5-turbo-0125":     "gpt-3.5-turbo-0125",
-	"gpt-3.5-turbo-1106":     "gpt-3.5-turbo-1106",
-	"gpt-3.5-turbo-16k":      "gpt-3.5-turbo-16k",
+	"gpt-3.5-turbo":      "gpt-3.5-turbo",
+	"gpt-3.5-turbo-0125": "gpt-3.5-turbo-0125",
+	"gpt-3.5-turbo-1106": "gpt-3.5-turbo-1106",
+	"gpt-3.5-turbo-16k":  "gpt-3.5-turbo-16k",
 	// o 系列
-	"o1":                     "o1",
-	"o1-preview":             "o1-preview",
-	"o1-mini":                "o1-mini",
-	"o1-pro":                 "o1-pro",
-	"o3":                     "o3",
-	"o3-mini":                "o3-mini",
-	"o3-pro":                 "o3-pro",
-	"o4-mini":                "o4-mini",
+	"o1":         "o1",
+	"o1-preview": "o1-preview",
+	"o1-mini":    "o1-mini",
+	"o1-pro":     "o1-pro",
+	"o3":         "o3",
+	"o3-mini":    "o3-mini",
+	"o3-pro":     "o3-pro",
+	"o4-mini":    "o4-mini",
 	// chatgpt latest
-	"chatgpt-4o-latest":      "chatgpt-4o-latest",
+	"chatgpt-4o-latest": "chatgpt-4o-latest",
 }
 
 // DefaultBedrockModelMapping 是 AWS Bedrock 平台的默认模型映射
