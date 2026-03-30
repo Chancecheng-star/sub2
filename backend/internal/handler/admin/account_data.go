@@ -59,6 +59,7 @@ type DataAccount struct {
 
 type DataImportRequest struct {
 	Data                 DataPayload `json:"data"`
+	GroupID              *string     `json:"group_id,omitempty"`
 	SkipDefaultGroupBind *bool       `json:"skip_default_group_bind"`
 }
 
@@ -194,6 +195,13 @@ func (h *AccountHandler) importData(ctx context.Context, req DataImportRequest) 
 		skipDefaultGroupBind = *req.SkipDefaultGroupBind
 	}
 
+	// 如果传入了 group_id，则绑定到该分组
+	var groupIDs []int64
+	if req.GroupID != nil && *req.GroupID != "" {
+		groupIDs = []int64{*req.GroupID}
+		skipDefaultGroupBind = false
+	}
+
 	dataPayload := req.Data
 	result := DataImportResult{}
 
@@ -308,7 +316,7 @@ func (h *AccountHandler) importData(ctx context.Context, req DataImportRequest) 
 			Concurrency:          item.Concurrency,
 			Priority:             item.Priority,
 			RateMultiplier:       item.RateMultiplier,
-			GroupIDs:             nil,
+			GroupIDs:             groupIDs,
 			ExpiresAt:            item.ExpiresAt,
 			AutoPauseOnExpired:   item.AutoPauseOnExpired,
 			SkipDefaultGroupBind: skipDefaultGroupBind,
