@@ -24,8 +24,8 @@ const (
 	updateCacheTTL = 1200 // 20 minutes
 
 	// 默认走老大的仓库；如需切换，可通过环境变量覆盖。
-	defaultGitHubRepo   = "Chancecheng-star/sub2"
-	updateRepoEnvKey    = "SUB2API_UPDATE_GITHUB_REPO"
+	defaultGitHubRepo = "Chancecheng-star/sub2"
+	updateRepoEnvKey  = "SUB2API_UPDATE_GITHUB_REPO"
 
 	// Security: allowed download domains for updates
 	allowedDownloadHost = "github.com"
