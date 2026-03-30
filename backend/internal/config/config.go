@@ -1,4 +1,4 @@
-// Package config provides configuration loading, defaults, and validation.
+﻿// Package config provides configuration loading, defaults, and validation.
 package config
 
 import (
@@ -201,8 +201,20 @@ type TokenRefreshConfig struct {
 	SyncLinkedSoraAccounts bool `mapstructure:"sync_linked_sora_accounts"`
 	// 失效账号自动清理配置（基于 error 状态 + 错误关键字 + 宽限期）
 	InvalidCleanup TokenRefreshInvalidCleanupConfig `mapstructure:"invalid_cleanup"`
+	// 即时删除配置（401/429 错误）
+	ImmediateDelete ImmediateDeleteConfig `mapstructure:"immediate_delete"`
 }
 
+
+// ImmediateDeleteConfig 即时删除配置（401/429 错误）
+type ImmediateDeleteConfig struct {
+	// 是否启用即时删除
+	Enabled bool `mapstructure:"enabled"`
+	// 401 错误容忍次数（连续多少次 401 后删除）
+	Error401Threshold int `mapstructure:"error_401_threshold"`
+	// 429 usage_limit_reached 是否立即删除
+	DeleteOnUsageLimit bool `mapstructure:"delete_on_usage_limit"`
+}
 type TokenRefreshInvalidCleanupConfig struct {
 	// 是否启用失效账号自动删除
 	Enabled bool `mapstructure:"enabled"`
@@ -1508,6 +1520,10 @@ func setDefaults() {
 	viper.SetDefault("token_refresh.invalid_cleanup.grace_period_minutes", 10)
 	viper.SetDefault("token_refresh.invalid_cleanup.dry_run", false)
 	viper.SetDefault("token_refresh.invalid_cleanup.match_keywords", []string{"401", "invalid_grant", "invalid_client", "unauthorized_client", "access_denied"})
+	// 即时删除配置
+	viper.SetDefault("token_refresh.immediate_delete.enabled", true)
+	viper.SetDefault("token_refresh.immediate_delete.error_401_threshold", 3)
+	viper.SetDefault("token_refresh.immediate_delete.delete_on_usage_limit", true)
 
 	// Gemini OAuth - configure via environment variables or config file
 	// GEMINI_OAUTH_CLIENT_ID and GEMINI_OAUTH_CLIENT_SECRET
@@ -2402,3 +2418,6 @@ func warnIfInsecureURL(field, raw string) {
 		slog.Warn("url uses http scheme; use https in production to avoid token leakage", "field", field)
 	}
 }
+
+
+
