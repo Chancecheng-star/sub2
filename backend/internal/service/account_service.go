@@ -169,6 +169,13 @@ func (s *AccountService) Create(ctx context.Context, req CreateAccountRequest) (
 		account.AutoPauseOnExpired = true
 	}
 
+	// 如果是 OpenAI 平台且没有配置 model_mapping，使用默认值
+	if req.Platform == "OpenAI" && account.Extra != nil {
+		if _, hasModelMapping := account.Extra["model_mapping"]; !hasModelMapping {
+			account.Extra["model_mapping"] = domain.DefaultOpenAIModelMapping
+		}
+	}
+
 	if err := s.accountRepo.Create(ctx, account); err != nil {
 		return nil, fmt.Errorf("create account: %w", err)
 	}
