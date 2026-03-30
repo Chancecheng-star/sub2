@@ -2658,17 +2658,6 @@ func (s *adminServiceImpl) EnsureOpenAIPrivacy(ctx context.Context, account *Acc
 	if mode == "" {
 		return ""
 	}
-	if mode == PrivacyModeAccountDeactivated {
-		if err := s.accountRepo.Delete(ctx, account.ID); err != nil {
-			slog.Warn("admin.delete_deactivated_oauth_account_failed",
-				"account_id", account.ID,
-				"error", err,
-			)
-			return mode
-		}
-		slog.Warn("admin.deleted_deactivated_oauth_account", "account_id", account.ID)
-		return mode
-	}
 
 	_ = s.accountRepo.UpdateExtra(ctx, account.ID, map[string]any{"privacy_mode": mode})
 	return mode

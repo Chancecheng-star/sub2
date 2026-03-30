@@ -149,8 +149,9 @@ func (s *RateLimitService) HandleUpstreamError(ctx context.Context, account *Acc
 		}
 		// 其他 400 错误（如参数问题）不处理，不禁用账号
 	case 401:
-		// OAuth 账号在 401 错误时通常先临时不可调度（给 token 刷新窗口）；
-		// 但对于 token_revoked / invalidated oauth token 这类明确不可逆的失效，直接删号。
+		// OAuth 账号在 401 错误时先临时不可调度（给 token 刷新窗口）；
+		// 刷新后再次 401 才标记为 error（永久禁用）。
+		// 不再直接删号，避免误杀（临时网络问题、OAuth token 刷新延迟等）。
 		// Antigravity 除外：其 401 由 applyErrorPolicy 的 temp_unschedulable_rules 自行控制。
 		if account.Type == AccountTypeOAuth && account.Platform != PlatformAntigravity {
 			// 1. 失效缓存
@@ -158,21 +159,6 @@ func (s *RateLimitService) HandleUpstreamError(ctx context.Context, account *Acc
 				if err := s.tokenCacheInvalidator.InvalidateToken(ctx, account); err != nil {
 					slog.Warn("oauth_401_invalidate_cache_failed", "account_id", account.ID, "error", err)
 				}
-			}
-			msg := "Authentication failed (401): invalid or expired credentials"
-			if upstreamMsg != "" {
-				msg = "OAuth 401: " + upstreamMsg
-			}
-			if shouldDeleteImmediatelyForOAuth401(upstreamMsg, string(responseBody)) {
-				if err := s.accountRepo.Delete(ctx, account.ID); err != nil {
-					slog.Warn("oauth_401_delete_account_failed", "account_id", account.ID, "platform", account.Platform, "error", err, "reason", msg)
-					// 删除失败时退回 error，避免账号回到正常状态继续参与调度。
-					s.handleAuthError(ctx, account, msg)
-				} else {
-					slog.Warn("oauth_401_account_deleted", "account_id", account.ID, "platform", account.Platform, "reason", msg)
-				}
-				shouldDisable = true
-				break
 			}
 			// 2. 设置 expires_at 为当前时间，强制下次请求刷新 token
 			if account.Credentials == nil {
@@ -190,12 +176,15 @@ func (s *RateLimitService) HandleUpstreamError(ctx context.Context, account *Acc
 				cooldownMinutes = 10
 			}
 			until := time.Now().Add(time.Duration(cooldownMinutes) * time.Minute)
+			msg := "OAuth 401: " + upstreamMsg
 			if err := s.accountRepo.SetTempUnschedulable(ctx, account.ID, until, msg); err != nil {
 				slog.Warn("oauth_401_set_temp_unschedulable_failed", "account_id", account.ID, "error", err)
+			} else {
+				slog.Info("oauth_401_temp_unschedulable", "account_id", account.ID, "platform", account.Platform, "until", until.Format(time.RFC3339))
 			}
 			shouldDisable = true
 		} else {
-			// 非 OAuth / Antigravity OAuth：保持 SetError 行为
+			// 非 OAuth / Antigravity OAuth：SetError 永久禁用
 			msg := "Authentication failed (401): invalid or expired credentials"
 			if upstreamMsg != "" {
 				msg = "Authentication failed (401): " + upstreamMsg
@@ -626,24 +615,6 @@ func (s *RateLimitService) handleAuthError(ctx context.Context, account *Account
 		return
 	}
 	slog.Warn("account_disabled_auth_error", "account_id", account.ID, "error", errorMsg)
-}
-
-func shouldDeleteImmediatelyForOAuth401(parts ...string) bool {
-	for _, part := range parts {
-		lower := strings.ToLower(strings.TrimSpace(part))
-		if lower == "" {
-			continue
-		}
-		if strings.Contains(lower, "token_revoked") ||
-			strings.Contains(lower, "invalidated oauth token") ||
-			strings.Contains(lower, "encountered invalidated oauth token for user") ||
-			strings.Contains(lower, "account has been deactivated") ||
-			strings.Contains(lower, "your openai account has been deactivated") ||
-			strings.Contains(lower, PrivacyModeAccountDeactivated) {
-			return true
-		}
-	}
-	return false
 }
 
 // handle403 处理 403 Forbidden 错误
@@ -1220,14 +1191,6 @@ func (s *RateLimitService) RecoverAccountState(ctx context.Context, accountID in
 	account, err := s.accountRepo.GetByID(ctx, accountID)
 	if err != nil {
 		return nil, err
-	}
-
-	if shouldDeleteImmediatelyForOAuth401(account.TempUnschedulableReason, account.ErrorMessage) {
-		if err := s.accountRepo.Delete(ctx, accountID); err != nil {
-			return nil, err
-		}
-		slog.Warn("recover_account_state_deleted_irreversible_oauth_account", "account_id", accountID, "reason", account.TempUnschedulableReason)
-		return &SuccessfulTestRecoveryResult{}, nil
 	}
 
 	result := &SuccessfulTestRecoveryResult{}
