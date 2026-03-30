@@ -236,14 +236,14 @@ const handleImport = async () => {
           data: dataPayload,
           group_id: selectedGroupId.value || undefined,
           skip_default_group_bind: !selectedGroupId.value
-        })
+        } as any)
 
         // 累加结果
-        totalResult.account_created += res.account_created
-        totalResult.account_failed += res.account_failed
-        totalResult.proxy_created += res.proxy_created
-        totalResult.proxy_reused += res.proxy_reused
-        totalResult.proxy_failed += res.proxy_failed
+        totalResult.account_created += res.account_created || 0
+        totalResult.account_failed += res.account_failed || 0
+        totalResult.proxy_created += res.proxy_created || 0
+        totalResult.proxy_reused += res.proxy_reused || 0
+        totalResult.proxy_failed += res.proxy_failed || 0
         if (res.errors) {
           totalResult.errors.push(...res.errors)
         }
@@ -251,7 +251,7 @@ const handleImport = async () => {
         // 单个文件失败，记录错误继续下一个
         totalResult.account_failed++
         totalResult.errors.push({
-          kind: 'file',
+          kind: 'account' as any,
           name: sourceFile.name,
           message: fileError instanceof SyntaxError 
             ? t('admin.accounts.dataImportParseFailed') 

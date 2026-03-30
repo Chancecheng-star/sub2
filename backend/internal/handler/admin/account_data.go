@@ -198,8 +198,11 @@ func (h *AccountHandler) importData(ctx context.Context, req DataImportRequest) 
 	// 如果传入了 group_id，则绑定到该分组
 	var groupIDs []int64
 	if req.GroupID != nil && *req.GroupID != "" {
-		groupIDs = []int64{*req.GroupID}
-		skipDefaultGroupBind = false
+		// 将 string 转换为 int64
+		if groupID, err := strconv.ParseInt(*req.GroupID, 10, 64); err == nil {
+			groupIDs = []int64{groupID}
+			skipDefaultGroupBind = false
+		}
 	}
 
 	dataPayload := req.Data
