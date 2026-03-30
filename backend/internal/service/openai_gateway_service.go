@@ -3066,7 +3066,7 @@ func (s *OpenAIGatewayService) handleErrorResponse(
 		// 401: 记录错误，连续 3 次后删除（通过 updated_at 和 error_message 判断）
 		if resp.StatusCode == 401 {
 			// 更新账号错误信息
-			account.ErrorMessage = &upstreamMsg
+			account.ErrorMessage = upstreamMsg
 			account.Status = "error"
 			account.UpdatedAt = time.Now()
 			_ = s.accountRepo.Update(ctx, account)
@@ -3237,7 +3237,7 @@ func (s *OpenAIGatewayService) handleCompatErrorResponse(
 		
 		// 401: 记录错误，连续 3 次后删除
 		if resp.StatusCode == 401 {
-			account.ErrorMessage = &upstreamMsg
+			account.ErrorMessage = upstreamMsg
 			account.Status = "error"
 			account.UpdatedAt = time.Now()
 			_ = s.accountRepo.Update(c.Request.Context(), account)
