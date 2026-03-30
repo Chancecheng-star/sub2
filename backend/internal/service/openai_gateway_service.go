@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"sort"
@@ -3218,6 +3219,32 @@ func (s *OpenAIGatewayService) handleCompatErrorResponse(
 			c.Request.Context(), account, resp.StatusCode, resp.Header, body,
 		)
 	}
+	
+	// ========== 即时删除逻辑（401/429）==========
+	if s.cfg != nil && s.cfg.TokenRefresh.ImmediateDelete.Enabled {
+		// 429 usage_limit_reached: 立即删除
+		if resp.StatusCode == 429 && s.cfg.TokenRefresh.ImmediateDelete.DeleteOnUsageLimit {
+			if strings.Contains(strings.ToLower(upstreamMsg), "usage_limit_reached") {
+				_ = s.accountRepo.Delete(c.Request.Context(), account.ID)
+				slog.Info("account.immediate_delete.usage_limit",
+					"account_id", account.ID,
+					"account_name", account.Name,
+					"platform", account.Platform,
+					"error_message", upstreamMsg,
+				)
+			}
+		}
+		
+		// 401: 记录错误，连续 3 次后删除
+		if resp.StatusCode == 401 {
+			account.ErrorMessage = &upstreamMsg
+			account.Status = "error"
+			account.UpdatedAt = time.Now()
+			_ = s.accountRepo.Update(c.Request.Context(), account)
+		}
+	}
+	// ===========================================
+	
 	kind := "http_error"
 	if shouldDisable {
 		kind = "failover"
