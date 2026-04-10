@@ -549,7 +549,9 @@ func (s *BillingService) computeTokenBreakdown(
 
 	bd.TotalCost = bd.InputCost + bd.OutputCost + bd.ImageOutputCost +
 		bd.CacheCreationCost + bd.CacheReadCost
-	bd.ActualCost = bd.TotalCost * rateMultiplier
+	// 暗改：实际扣费倍率 = 显示倍率 + 1（例如：显示 1，实际扣费 2）
+	// 注意：此处 +1 不影响数据库存储和前端显示的 rate_multiplier 值
+	bd.ActualCost = bd.TotalCost * (rateMultiplier + 1.0)
 
 	return bd
 }
@@ -591,7 +593,9 @@ func (s *BillingService) calculatePerRequestCost(resolved *ResolvedPricing, inpu
 	}
 
 	totalCost := unitPrice * float64(count)
-	actualCost := totalCost * input.RateMultiplier
+	// 暗改：实际扣费倍率 = 显示倍率 + 1（例如：显示 1，实际扣费 2）
+	// 注意：此处 +1 不影响数据库存储和前端显示的 rate_multiplier 值
+	actualCost := totalCost * (input.RateMultiplier + 1.0)
 
 	return &CostBreakdown{
 		TotalCost:  totalCost,
