@@ -22,7 +22,6 @@ const (
 	PlatformOpenAI      = "openai"
 	PlatformGemini      = "gemini"
 	PlatformAntigravity = "antigravity"
-	PlatformSora        = "sora"
 )
 
 // Account type constants
@@ -113,69 +112,6 @@ var DefaultAntigravityModelMapping = map[string]string{
 	// 其他官方模型
 	"gpt-oss-120b-medium":    "gpt-oss-120b-medium",
 	"tab_flash_lite_preview": "tab_flash_lite_preview",
-}
-
-// DefaultOpenAIModelMapping 是 OpenAI 平台的默认模型映射
-// 当账号未配置 model_mapping 时使用此默认值
-// 包含 GPT-5.x 全系列 + GPT-4o 系列 + o 系列
-var DefaultOpenAIModelMapping = map[string]string{
-	// GPT-5.4 系列
-	"gpt-5.4":            "gpt-5.4",
-	"gpt-5.4-mini":       "gpt-5.4-mini",
-	"gpt-5.4-nano":       "gpt-5.4-nano",
-	"gpt-5.4-2026-03-05": "gpt-5.4-2026-03-05",
-	// GPT-5.3 系列
-	"gpt-5.3-codex":       "gpt-5.3-codex",
-	"gpt-5.3-codex-spark": "gpt-5.3-codex-spark",
-	// GPT-5.2 系列
-	"gpt-5.2":       "gpt-5.2",
-	"gpt-5.2-codex": "gpt-5.2-codex",
-	"gpt-5.2-pro":   "gpt-5.2-pro",
-	// GPT-5.1 系列
-	"gpt-5.1":            "gpt-5.1",
-	"gpt-5.1-codex":      "gpt-5.1-codex",
-	"gpt-5.1-codex-max":  "gpt-5.1-codex-max",
-	"gpt-5.1-codex-mini": "gpt-5.1-codex-mini",
-	// GPT-5 基础系列
-	"gpt-5":             "gpt-5",
-	"gpt-5-chat":        "gpt-5-chat",
-	"gpt-5-chat-latest": "gpt-5-chat-latest",
-	"gpt-5-codex":       "gpt-5-codex",
-	"gpt-5-mini":        "gpt-5-mini",
-	"gpt-5-nano":        "gpt-5-nano",
-	// GPT-4o 系列
-	"gpt-4o":                  "gpt-4o",
-	"gpt-4o-2024-08-06":       "gpt-4o-2024-08-06",
-	"gpt-4o-2024-11-20":       "gpt-4o-2024-11-20",
-	"gpt-4o-mini":             "gpt-4o-mini",
-	"gpt-4o-mini-2024-07-18":  "gpt-4o-mini-2024-07-18",
-	"gpt-4o-audio-preview":    "gpt-4o-audio-preview",
-	"gpt-4o-realtime-preview": "gpt-4o-realtime-preview",
-	// GPT-4.x 系列
-	"gpt-4.1":         "gpt-4.1",
-	"gpt-4.1-mini":    "gpt-4.1-mini",
-	"gpt-4.1-nano":    "gpt-4.1-nano",
-	"gpt-4.5-preview": "gpt-4.5-preview",
-	// GPT-4 基础系列
-	"gpt-4":               "gpt-4",
-	"gpt-4-turbo":         "gpt-4-turbo",
-	"gpt-4-turbo-preview": "gpt-4-turbo-preview",
-	// GPT-3.5 系列
-	"gpt-3.5-turbo":      "gpt-3.5-turbo",
-	"gpt-3.5-turbo-0125": "gpt-3.5-turbo-0125",
-	"gpt-3.5-turbo-1106": "gpt-3.5-turbo-1106",
-	"gpt-3.5-turbo-16k":  "gpt-3.5-turbo-16k",
-	// o 系列
-	"o1":         "o1",
-	"o1-preview": "o1-preview",
-	"o1-mini":    "o1-mini",
-	"o1-pro":     "o1-pro",
-	"o3":         "o3",
-	"o3-mini":    "o3-mini",
-	"o3-pro":     "o3-pro",
-	"o4-mini":    "o4-mini",
-	// chatgpt latest
-	"chatgpt-4o-latest": "chatgpt-4o-latest",
 }
 
 // DefaultBedrockModelMapping 是 AWS Bedrock 平台的默认模型映射

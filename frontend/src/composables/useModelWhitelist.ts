@@ -60,22 +60,6 @@ const geminiModels = [
   'gemini-3-pro-preview'
 ]
 
-// Sora
-const soraModels = [
-  'gpt-image', 'gpt-image-landscape', 'gpt-image-portrait',
-  'sora2-landscape-10s', 'sora2-portrait-10s',
-  'sora2-landscape-15s', 'sora2-portrait-15s',
-  'sora2-landscape-25s', 'sora2-portrait-25s',
-  'sora2pro-landscape-10s', 'sora2pro-portrait-10s',
-  'sora2pro-landscape-15s', 'sora2pro-portrait-15s',
-  'sora2pro-landscape-25s', 'sora2pro-portrait-25s',
-  'sora2pro-hd-landscape-10s', 'sora2pro-hd-portrait-10s',
-  'sora2pro-hd-landscape-15s', 'sora2pro-hd-portrait-15s',
-  'prompt-enhance-short-10s', 'prompt-enhance-short-15s', 'prompt-enhance-short-20s',
-  'prompt-enhance-medium-10s', 'prompt-enhance-medium-15s', 'prompt-enhance-medium-20s',
-  'prompt-enhance-long-10s', 'prompt-enhance-long-15s', 'prompt-enhance-long-20s'
-]
-
 // Antigravity 官方支持的模型（精确匹配）
 // 基于官方 API 返回的模型列表，只支持 Claude 4.5+ 和 Gemini 2.5+
 const antigravityModels = [
@@ -231,40 +215,11 @@ const perplexityModels = [
   'llama-3-sonar-small-32k-chat', 'llama-3-sonar-large-32k-chat'
 ]
 
-// OpenAI 默认模型（导入账号时的默认白名单）
-export const openaiDefaultModels = [
-  // GPT-5.4 系列
-  'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.4-nano', 'gpt-5.4-2026-03-05',
-  // GPT-5.3 系列
-  'gpt-5.3-codex', 'gpt-5.3-codex-spark',
-  // GPT-5.2 系列
-  'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.2-pro',
-  // GPT-5.1 系列
-  'gpt-5.1', 'gpt-5.1-codex', 'gpt-5.1-codex-max', 'gpt-5.1-codex-mini',
-  // GPT-5 基础系列
-  'gpt-5', 'gpt-5-chat', 'gpt-5-chat-latest', 'gpt-5-codex', 'gpt-5-mini', 'gpt-5-nano',
-  // GPT-4o 系列
-  'gpt-4o', 'gpt-4o-2024-08-06', 'gpt-4o-2024-11-20',
-  'gpt-4o-mini', 'gpt-4o-mini-2024-07-18',
-  'gpt-4o-audio-preview', 'gpt-4o-realtime-preview',
-  // GPT-4.x 系列
-  'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.5-preview',
-  // GPT-4 基础系列
-  'gpt-4', 'gpt-4-turbo', 'gpt-4-turbo-preview',
-  // GPT-3.5 系列
-  'gpt-3.5-turbo', 'gpt-3.5-turbo-0125', 'gpt-3.5-turbo-1106', 'gpt-3.5-turbo-16k',
-  // o 系列
-  'o1', 'o1-preview', 'o1-mini', 'o1-pro', 'o3', 'o3-mini', 'o3-pro', 'o4-mini',
-  // chatgpt latest
-  'chatgpt-4o-latest'
-]
-
 // 所有模型（去重）
 const allModelsList: string[] = [
   ...openaiModels,
   ...claudeModels,
   ...geminiModels,
-  ...soraModels,
   ...zhipuModels,
   ...qwenModels,
   ...deepseekModels,
@@ -316,8 +271,6 @@ const openaiPresetMappings = [
   { label: 'Opus→5.4', from: 'claude-opus-4-6', to: 'gpt-5.4', color: 'bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400' },
   { label: 'Sonnet→5.4', from: 'claude-sonnet-4-6', to: 'gpt-5.4', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400' }
 ]
-
-const soraPresetMappings: { label: string; from: string; to: string; color: string }[] = []
 
 const geminiPresetMappings = [
   { label: 'Flash 2.0', from: 'gemini-2.0-flash', to: 'gemini-2.0-flash', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -413,7 +366,6 @@ export function getModelsByPlatform(platform: string): string[] {
     case 'anthropic':
     case 'claude': return claudeModels
     case 'gemini': return geminiModels
-    case 'sora': return soraModels
     case 'antigravity': return antigravityModels
     case 'zhipu': return zhipuModels
     case 'qwen': return qwenModels
@@ -438,7 +390,6 @@ export function getModelsByPlatform(platform: string): string[] {
 export function getPresetMappingsByPlatform(platform: string) {
   if (platform === 'openai') return openaiPresetMappings
   if (platform === 'gemini') return geminiPresetMappings
-  if (platform === 'sora') return soraPresetMappings
   if (platform === 'antigravity') return antigravityPresetMappings
   if (platform === 'bedrock') return bedrockPresetMappings
   return anthropicPresetMappings

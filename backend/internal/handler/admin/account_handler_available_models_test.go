@@ -33,7 +33,7 @@ func setupAvailableModelsRouter(adminSvc service.AdminService) *gin.Engine {
 	return router
 }
 
-func TestAccountHandlerGetAvailableModels_OpenAIOAuthIgnoresExplicitModelMapping(t *testing.T) {
+func TestAccountHandlerGetAvailableModels_OpenAIOAuthUsesExplicitModelMapping(t *testing.T) {
 	svc := &availableModelsAdminService{
 		stubAdminService: newStubAdminService(),
 		account: service.Account{
@@ -63,14 +63,8 @@ func TestAccountHandlerGetAvailableModels_OpenAIOAuthIgnoresExplicitModelMapping
 		} `json:"data"`
 	}
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
-	require.NotEmpty(t, resp.Data)
-
-	var ids []string
-	for _, m := range resp.Data {
-		ids = append(ids, m.ID)
-	}
-	require.Contains(t, ids, "gpt-5.4")
-	require.NotEqual(t, []string{"gpt-5"}, ids)
+	require.Len(t, resp.Data, 1)
+	require.Equal(t, "gpt-5", resp.Data[0].ID)
 }
 
 func TestAccountHandlerGetAvailableModels_OpenAIOAuthPassthroughFallsBackToDefaults(t *testing.T) {

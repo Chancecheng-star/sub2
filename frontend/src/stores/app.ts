@@ -330,7 +330,10 @@ export const useAppStore = defineStore('app', () => {
         purchase_subscription_enabled: false,
         purchase_subscription_url: '',
         custom_menu_items: [],
+        custom_endpoints: [],
         linuxdo_oauth_enabled: false,
+        oidc_oauth_enabled: false,
+        oidc_oauth_provider_name: 'OIDC',
         sora_client_enabled: false,
         backend_mode_enabled: false,
         version: siteVersion.value

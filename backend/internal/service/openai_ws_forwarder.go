@@ -2515,12 +2515,9 @@ func (s *OpenAIGatewayService) ProxyResponsesWebSocketFromClient(
 			}
 			normalized = next
 		}
-		mappedModel := account.GetMappedModel(originalModel)
-		if normalizedModel := normalizeCodexModel(mappedModel); normalizedModel != "" {
-			mappedModel = normalizedModel
-		}
-		if mappedModel != originalModel {
-			next, setErr := applyPayloadMutation(normalized, "model", mappedModel)
+		upstreamModel := normalizeOpenAIModelForUpstream(account, account.GetMappedModel(originalModel))
+		if upstreamModel != originalModel {
+			next, setErr := applyPayloadMutation(normalized, "model", upstreamModel)
 			if setErr != nil {
 				return openAIWSClientPayload{}, NewOpenAIWSClientCloseError(coderws.StatusPolicyViolation, "invalid websocket request payload", setErr)
 			}
@@ -2776,10 +2773,7 @@ func (s *OpenAIGatewayService) ProxyResponsesWebSocketFromClient(
 		mappedModel := ""
 		var mappedModelBytes []byte
 		if originalModel != "" {
-			mappedModel = account.GetMappedModel(originalModel)
-			if normalizedModel := normalizeCodexModel(mappedModel); normalizedModel != "" {
-				mappedModel = normalizedModel
-			}
+			mappedModel = normalizeOpenAIModelForUpstream(account, account.GetMappedModel(originalModel))
 			needModelReplace = mappedModel != "" && mappedModel != originalModel
 			if needModelReplace {
 				mappedModelBytes = []byte(mappedModel)
@@ -3844,6 +3838,11 @@ func (s *OpenAIGatewayService) SelectAccountByPreviousResponseID(
 		return nil, nil
 	}
 	if requestedModel != "" && !account.IsModelSupported(requestedModel) {
+		return nil, nil
+	}
+	account = s.recheckSelectedOpenAIAccountFromDB(ctx, account, requestedModel)
+	if account == nil {
+		_ = store.DeleteResponseAccount(ctx, derefGroupID(groupID), responseID)
 		return nil, nil
 	}
 

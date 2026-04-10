@@ -22,10 +22,7 @@ import (
 const (
 	updateCacheKey = "update_check_cache"
 	updateCacheTTL = 1200 // 20 minutes
-
-	// 默认走老大的仓库；如需切换，可通过环境变量覆盖。
-	defaultGitHubRepo = "Chancecheng-star/sub2"
-	updateRepoEnvKey  = "SUB2API_UPDATE_GITHUB_REPO"
+	githubRepo     = "Wei-Shaw/sub2api"
 
 	// Security: allowed download domains for updates
 	allowedDownloadHost = "github.com"
@@ -277,7 +274,7 @@ func (s *UpdateService) Rollback() error {
 }
 
 func (s *UpdateService) fetchLatestRelease(ctx context.Context) (*UpdateInfo, error) {
-	release, err := s.githubClient.FetchLatestRelease(ctx, resolveGitHubRepo())
+	release, err := s.githubClient.FetchLatestRelease(ctx, githubRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -307,14 +304,6 @@ func (s *UpdateService) fetchLatestRelease(ctx context.Context) (*UpdateInfo, er
 		Cached:    false,
 		BuildType: s.buildType,
 	}, nil
-}
-
-func resolveGitHubRepo() string {
-	repo := strings.TrimSpace(os.Getenv(updateRepoEnvKey))
-	if repo == "" {
-		return defaultGitHubRepo
-	}
-	return repo
 }
 
 func (s *UpdateService) downloadFile(ctx context.Context, downloadURL, dest string) error {

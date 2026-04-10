@@ -11,7 +11,7 @@ on:
         required: true
         type: string
       simple_release:
-        description: 'Simple release: only x86_64 GHCR image, skip other artifacts (NOT compatible with in-app self-update unless you intentionally bypass the guard)'
+        description: 'Simple release: only x86_64 GHCR image, skip other artifacts'
         required: false
         type: boolean
         default: false
@@ -20,7 +20,6 @@ on:
 # tag push 触发时读取 vars.SIMPLE_RELEASE，workflow_dispatch 时使用输入参数
 env:
   SIMPLE_RELEASE: ${{ github.event.inputs.simple_release == 'true' || vars.SIMPLE_RELEASE == 'true' }}
-  ALLOW_SIMPLE_RELEASE: ${{ vars.ALLOW_SIMPLE_RELEASE == 'true' }}
 
 permissions:
   contents: write
@@ -89,16 +88,6 @@ jobs:
     needs: [update-version, build-frontend]
     runs-on: ubuntu-latest
     steps:
-      - name: Guard simple release for self-update compatibility
-        shell: bash
-        run: |
-          if [ "${SIMPLE_RELEASE}" = "true" ] && [ "${ALLOW_SIMPLE_RELEASE}" != "true" ]; then
-            echo "❌ simple release is blocked by default."
-            echo "The in-app updater requires full GitHub Release assets (archives + checksums.txt)."
-            echo "Set repository variable ALLOW_SIMPLE_RELEASE=true only when you intentionally want a GHCR-only release and accept that self-update will not work for that release."
-            exit 1
-          fi
-
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -126,7 +115,7 @@ jobs:
 
       - name: Verify Go version
         run: |
-          go version | grep -q 'go1.26.1'
+          go version | grep -q 'go1.26.2'
 
       # Docker setup for GoReleaser
       - name: Set up QEMU

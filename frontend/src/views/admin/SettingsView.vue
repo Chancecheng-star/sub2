@@ -454,6 +454,72 @@
                   </div>
                   <Toggle v-model="rectifierForm.thinking_budget_enabled" />
                 </div>
+
+                <!-- API Key Signature Rectifier -->
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{
+                      t('admin.settings.rectifier.apikeySignature')
+                    }}</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ t('admin.settings.rectifier.apikeySignatureHint') }}
+                    </p>
+                  </div>
+                  <Toggle v-model="rectifierForm.apikey_signature_enabled" />
+                </div>
+
+                <!-- Custom Patterns (only when apikey_signature_enabled) -->
+                <div
+                  v-if="rectifierForm.apikey_signature_enabled"
+                  class="ml-4 space-y-3 border-l-2 border-gray-200 pl-4 dark:border-dark-600"
+                >
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{
+                      t('admin.settings.rectifier.apikeyPatterns')
+                    }}</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ t('admin.settings.rectifier.apikeyPatternsHint') }}
+                    </p>
+                  </div>
+                  <div
+                    v-for="(_, index) in rectifierForm.apikey_signature_patterns"
+                    :key="index"
+                    class="flex items-center gap-2"
+                  >
+                    <input
+                      v-model="rectifierForm.apikey_signature_patterns[index]"
+                      type="text"
+                      class="input input-sm flex-1"
+                      :placeholder="t('admin.settings.rectifier.apikeyPatternPlaceholder')"
+                    />
+                    <button
+                      type="button"
+                      @click="rectifierForm.apikey_signature_patterns.splice(index, 1)"
+                      class="btn btn-ghost btn-xs text-red-500 hover:text-red-700"
+                    >
+                      <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    @click="rectifierForm.apikey_signature_patterns.push('')"
+                    class="btn btn-ghost btn-xs text-primary-600 dark:text-primary-400"
+                  >
+                    + {{ t('admin.settings.rectifier.addPattern') }}
+                  </button>
+                </div>
               </div>
 
               <!-- Save Button -->
@@ -563,6 +629,108 @@
                   <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                     {{ t('admin.settings.betaPolicy.errorMessageHint') }}
                   </p>
+                </div>
+
+                <!-- Quick Presets (only for tokens with presets) -->
+                <div v-if="betaPresets[rule.beta_token]?.length" class="mt-3">
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                    {{ t('admin.settings.betaPolicy.quickPresets') }}
+                  </label>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      v-for="preset in betaPresets[rule.beta_token]"
+                      :key="preset.label"
+                      type="button"
+                      class="inline-flex items-center gap-1 rounded-md border border-primary-200 bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
+                      @click="applyBetaPreset(rule, preset)"
+                      :title="preset.description"
+                    >
+                      {{ preset.label }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Model Whitelist -->
+                <div class="mt-3">
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                    {{ t('admin.settings.betaPolicy.modelWhitelist') }}
+                  </label>
+                  <p class="mb-2 text-xs text-gray-400 dark:text-gray-500">
+                    {{ t('admin.settings.betaPolicy.modelWhitelistHint') }}
+                  </p>
+                  <!-- Existing patterns -->
+                  <div
+                    v-for="(_, index) in (rule.model_whitelist || [])"
+                    :key="index"
+                    class="mb-1.5 flex items-center gap-2"
+                  >
+                    <input
+                      v-model="rule.model_whitelist![index]"
+                      type="text"
+                      class="input input-sm flex-1"
+                      :placeholder="t('admin.settings.betaPolicy.modelPatternPlaceholder')"
+                    />
+                    <button
+                      type="button"
+                      @click="rule.model_whitelist!.splice(index, 1)"
+                      class="shrink-0 rounded p-1 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                    >
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <!-- Add pattern button -->
+                  <button
+                    type="button"
+                    @click="if (!rule.model_whitelist) rule.model_whitelist = []; rule.model_whitelist.push('')"
+                    class="mb-2 inline-flex items-center gap-1 text-xs text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                  >
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ t('admin.settings.betaPolicy.addModelPattern') }}
+                  </button>
+                  <!-- Common pattern chips -->
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('admin.settings.betaPolicy.commonPatterns') }}:</span>
+                    <button
+                      v-for="pattern in commonModelPatterns"
+                      :key="pattern"
+                      type="button"
+                      class="rounded border border-gray-200 px-2 py-0.5 text-xs text-gray-600 transition-colors hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 dark:border-dark-600 dark:text-gray-400 dark:hover:border-primary-700 dark:hover:bg-primary-900/30 dark:hover:text-primary-300"
+                      @click="addQuickPattern(rule, pattern)"
+                    >
+                      {{ pattern }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Fallback Action (only when model_whitelist is non-empty) -->
+                <div v-if="rule.model_whitelist && rule.model_whitelist.length > 0" class="mt-3">
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                    {{ t('admin.settings.betaPolicy.fallbackAction') }}
+                  </label>
+                  <Select
+                    :modelValue="rule.fallback_action || 'pass'"
+                    @update:modelValue="rule.fallback_action = $event as any"
+                    :options="betaPolicyActionOptions"
+                  />
+                  <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                    {{ t('admin.settings.betaPolicy.fallbackActionHint') }}
+                  </p>
+                  <!-- Fallback Error Message (only when fallback_action=block) -->
+                  <div v-if="rule.fallback_action === 'block'" class="mt-2">
+                    <input
+                      v-model="rule.fallback_error_message"
+                      type="text"
+                      class="input"
+                      :placeholder="t('admin.settings.betaPolicy.fallbackErrorMessagePlaceholder')"
+                    />
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                      {{ t('admin.settings.betaPolicy.errorMessageHint') }}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -956,7 +1124,327 @@
             </div>
           </div>
         </div>
-        </div><!-- /Tab: Security — Registration, Turnstile, LinuxDo -->
+
+        <!-- Generic OIDC OAuth 登录 -->
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.oidc.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.oidc.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="font-medium text-gray-900 dark:text-white">{{
+                  t('admin.settings.oidc.enable')
+                }}</label>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.oidc.enableHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.oidc_connect_enabled" />
+            </div>
+
+            <div
+              v-if="form.oidc_connect_enabled"
+              class="space-y-6 border-t border-gray-100 pt-4 dark:border-dark-700"
+            >
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.providerName') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_provider_name"
+                    type="text"
+                    class="input"
+                    :placeholder="t('admin.settings.oidc.providerNamePlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.clientId') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_client_id"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.clientIdPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.clientSecret') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_client_secret"
+                    type="password"
+                    class="input font-mono text-sm"
+                    :placeholder="
+                      form.oidc_connect_client_secret_configured
+                        ? t('admin.settings.oidc.clientSecretConfiguredPlaceholder')
+                        : t('admin.settings.oidc.clientSecretPlaceholder')
+                    "
+                  />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{
+                      form.oidc_connect_client_secret_configured
+                        ? t('admin.settings.oidc.clientSecretConfiguredHint')
+                        : t('admin.settings.oidc.clientSecretHint')
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.issuerUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_issuer_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.issuerUrlPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.discoveryUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_discovery_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.discoveryUrlPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.authorizeUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_authorize_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.authorizeUrlPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.tokenUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_token_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.tokenUrlPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.userinfoUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_userinfo_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.userinfoUrlPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.jwksUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_jwks_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.jwksUrlPlaceholder')"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.scopes') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_scopes"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.scopesPlaceholder')"
+                  />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.oidc.scopesHint') }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.redirectUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_redirect_url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.redirectUrlPlaceholder')"
+                  />
+                  <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm w-fit"
+                      @click="setAndCopyOIDCRedirectUrl"
+                    >
+                      {{ t('admin.settings.oidc.quickSetCopy') }}
+                    </button>
+                    <code
+                      v-if="oidcRedirectUrlSuggestion"
+                      class="select-all break-all rounded bg-gray-50 px-2 py-1 font-mono text-xs text-gray-600 dark:bg-dark-800 dark:text-gray-300"
+                    >
+                      {{ oidcRedirectUrlSuggestion }}
+                    </code>
+                  </div>
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.oidc.redirectUrlHint') }}
+                  </p>
+                </div>
+
+                <div class="lg:col-span-2">
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.frontendRedirectUrl') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_frontend_redirect_url"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.frontendRedirectUrlPlaceholder')"
+                  />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.oidc.frontendRedirectUrlHint') }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.tokenAuthMethod') }}
+                  </label>
+                  <select v-model="form.oidc_connect_token_auth_method" class="input font-mono text-sm">
+                    <option value="client_secret_post">client_secret_post</option>
+                    <option value="client_secret_basic">client_secret_basic</option>
+                    <option value="none">none</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.clockSkewSeconds') }}
+                  </label>
+                  <input
+                    v-model.number="form.oidc_connect_clock_skew_seconds"
+                    type="number"
+                    min="0"
+                    max="600"
+                    class="input"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.allowedSigningAlgs') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_allowed_signing_algs"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.allowedSigningAlgsPlaceholder')"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700">
+                  <div>
+                    <label class="font-medium text-gray-900 dark:text-white">
+                      {{ t('admin.settings.oidc.usePkce') }}
+                    </label>
+                  </div>
+                  <Toggle v-model="form.oidc_connect_use_pkce" />
+                </div>
+
+                <div class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700">
+                  <div>
+                    <label class="font-medium text-gray-900 dark:text-white">
+                      {{ t('admin.settings.oidc.validateIdToken') }}
+                    </label>
+                  </div>
+                  <Toggle v-model="form.oidc_connect_validate_id_token" />
+                </div>
+
+                <div class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700">
+                  <div>
+                    <label class="font-medium text-gray-900 dark:text-white">
+                      {{ t('admin.settings.oidc.requireEmailVerified') }}
+                    </label>
+                  </div>
+                  <Toggle v-model="form.oidc_connect_require_email_verified" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.userinfoEmailPath') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_userinfo_email_path"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.userinfoEmailPathPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.userinfoIdPath') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_userinfo_id_path"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.userinfoIdPathPlaceholder')"
+                  />
+                </div>
+
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.oidc.userinfoUsernamePath') }}
+                  </label>
+                  <input
+                    v-model="form.oidc_connect_userinfo_username_path"
+                    type="text"
+                    class="input font-mono text-sm"
+                    :placeholder="t('admin.settings.oidc.userinfoUsernamePathPlaceholder')"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div><!-- /Tab: Security — Registration, Turnstile, LinuxDo, OIDC -->
 
         <!-- Tab: Users -->
         <div v-show="activeTab === 'users'" class="space-y-6">
@@ -1171,6 +1659,58 @@
             </div>
           </div>
         </div>
+
+        <!-- Gateway Forwarding Behavior -->
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.gatewayForwarding.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.gatewayForwarding.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <!-- Fingerprint Unification -->
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t('admin.settings.gatewayForwarding.fingerprintUnification') }}
+                </label>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.gatewayForwarding.fingerprintUnificationHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.enable_fingerprint_unification" />
+            </div>
+
+            <!-- Metadata Passthrough -->
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t('admin.settings.gatewayForwarding.metadataPassthrough') }}
+                </label>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.gatewayForwarding.metadataPassthroughHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.enable_metadata_passthrough" />
+            </div>
+
+            <!-- CCH Signing -->
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t('admin.settings.gatewayForwarding.cchSigning') }}
+                </label>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.gatewayForwarding.cchSigningHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.enable_cch_signing" />
+            </div>
+          </div>
+        </div>
         </div><!-- /Tab: Gateway — Claude Code, Scheduling -->
 
         <!-- Tab: General -->
@@ -1246,6 +1786,81 @@
               <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.settings.site.apiBaseUrlHint') }}
               </p>
+            </div>
+
+            <!-- Custom Endpoints -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.site.customEndpoints.title') }}
+              </label>
+              <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.site.customEndpoints.description') }}
+              </p>
+
+              <div class="space-y-3">
+                <div
+                  v-for="(ep, index) in form.custom_endpoints"
+                  :key="index"
+                  class="rounded-lg border border-gray-200 p-4 dark:border-dark-600"
+                >
+                  <div class="mb-3 flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {{ t('admin.settings.site.customEndpoints.itemLabel', { n: index + 1 }) }}
+                    </span>
+                    <button
+                      type="button"
+                      class="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                      @click="removeEndpoint(index)"
+                    >
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ t('admin.settings.site.customEndpoints.name') }}
+                      </label>
+                      <input
+                        v-model="ep.name"
+                        type="text"
+                        class="input text-sm"
+                        :placeholder="t('admin.settings.site.customEndpoints.namePlaceholder')"
+                      />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ t('admin.settings.site.customEndpoints.endpointUrl') }}
+                      </label>
+                      <input
+                        v-model="ep.endpoint"
+                        type="url"
+                        class="input font-mono text-sm"
+                        :placeholder="t('admin.settings.site.customEndpoints.endpointUrlPlaceholder')"
+                      />
+                    </div>
+                    <div class="sm:col-span-2">
+                      <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ t('admin.settings.site.customEndpoints.descriptionLabel') }}
+                      </label>
+                      <input
+                        v-model="ep.description"
+                        type="text"
+                        class="input text-sm"
+                        :placeholder="t('admin.settings.site.customEndpoints.descriptionPlaceholder')"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-2.5 text-sm text-gray-500 transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-dark-600 dark:text-gray-400 dark:hover:border-primary-500 dark:hover:text-primary-400"
+                @click="addEndpoint"
+              >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                {{ t('admin.settings.site.customEndpoints.add') }}
+              </button>
             </div>
 
             <!-- Contact Info -->
@@ -1393,31 +2008,6 @@
               <span class="text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.settings.purchase.integrationDocHint') }}
               </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sora Client Toggle -->
-        <div class="card">
-          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('admin.settings.soraClient.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {{ t('admin.settings.soraClient.description') }}
-            </p>
-          </div>
-          <div class="space-y-6 p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <label class="font-medium text-gray-900 dark:text-white">{{
-                  t('admin.settings.soraClient.enabled')
-                }}</label>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ t('admin.settings.soraClient.enabledHint') }}
-                </p>
-              </div>
-              <Toggle v-model="form.sora_client_enabled" />
             </div>
           </div>
         </div>
@@ -1580,7 +2170,7 @@
             <button
               type="button"
               @click="testSmtpConnection"
-              :disabled="testingSmtp"
+              :disabled="testingSmtp || loadFailed"
               class="btn btn-secondary btn-sm"
             >
               <svg v-if="testingSmtp" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -1650,6 +2240,11 @@
                   v-model="form.smtp_password"
                   type="password"
                   class="input"
+                  autocomplete="new-password"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  @keydown="smtpPasswordManuallyEdited = true"
+                  @paste="smtpPasswordManuallyEdited = true"
                   :placeholder="
                     form.smtp_password_configured
                       ? t('admin.settings.smtp.passwordConfiguredPlaceholder')
@@ -1732,7 +2327,7 @@
               <button
                 type="button"
                 @click="sendTestEmail"
-                :disabled="sendingTestEmail || !testEmailAddress"
+                :disabled="sendingTestEmail || !testEmailAddress || loadFailed"
                 class="btn btn-secondary"
               >
                 <svg
@@ -1771,14 +2366,9 @@
           <BackupSettings />
         </div>
 
-        <!-- Tab: Data Management -->
-        <div v-show="activeTab === 'data'">
-          <DataManagementSettings />
-        </div>
-
         <!-- Save Button -->
-        <div v-show="activeTab !== 'backup' && activeTab !== 'data'" class="flex justify-end">
-          <button type="submit" :disabled="saving" class="btn btn-primary">
+        <div v-show="activeTab !== 'backup'" class="flex justify-end">
+          <button type="submit" :disabled="saving || loadFailed" class="btn btn-primary">
             <svg v-if="saving" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle
                 class="opacity-25"
@@ -1820,7 +2410,6 @@ import GroupOptionItem from '@/components/common/GroupOptionItem.vue'
 import Toggle from '@/components/common/Toggle.vue'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import BackupSettings from '@/views/admin/BackupView.vue'
-import DataManagementSettings from '@/views/admin/DataManagementView.vue'
 import { useClipboard } from '@/composables/useClipboard'
 import { useAppStore } from '@/stores'
 import { useAdminSettingsStore } from '@/stores/adminSettings'
@@ -1835,7 +2424,7 @@ const { t } = useI18n()
 const appStore = useAppStore()
 const adminSettingsStore = useAdminSettingsStore()
 
-type SettingsTab = 'general' | 'security' | 'users' | 'gateway' | 'email' | 'backup' | 'data'
+type SettingsTab = 'general' | 'security' | 'users' | 'gateway' | 'email' | 'backup'
 const activeTab = ref<SettingsTab>('general')
 const settingsTabs = [
   { key: 'general'  as SettingsTab, icon: 'home'   as const },
@@ -1844,14 +2433,15 @@ const settingsTabs = [
   { key: 'gateway'  as SettingsTab, icon: 'server' as const },
   { key: 'email'    as SettingsTab, icon: 'mail'   as const },
   { key: 'backup'   as SettingsTab, icon: 'database' as const },
-  { key: 'data'     as SettingsTab, icon: 'cube'     as const },
 ]
 const { copyToClipboard } = useClipboard()
 
 const loading = ref(true)
+const loadFailed = ref(false)
 const saving = ref(false)
 const testingSmtp = ref(false)
 const sendingTestEmail = ref(false)
+const smtpPasswordManuallyEdited = ref(false)
 const testEmailAddress = ref('')
 const registrationEmailSuffixWhitelistTags = ref<string[]>([])
 const registrationEmailSuffixWhitelistDraft = ref('')
@@ -1889,7 +2479,9 @@ const rectifierSaving = ref(false)
 const rectifierForm = reactive({
   enabled: true,
   thinking_signature_enabled: true,
-  thinking_budget_enabled: true
+  thinking_budget_enabled: true,
+  apikey_signature_enabled: false,
+  apikey_signature_patterns: [] as string[]
 })
 
 // Beta Policy 状态
@@ -1901,6 +2493,9 @@ const betaPolicyForm = reactive({
     action: 'pass' | 'filter' | 'block'
     scope: 'all' | 'oauth' | 'apikey' | 'bedrock'
     error_message?: string
+    model_whitelist?: string[]
+    fallback_action?: 'pass' | 'filter' | 'block'
+    fallback_error_message?: string
   }>
 })
 
@@ -1918,6 +2513,7 @@ type SettingsForm = SystemSettings & {
   smtp_password: string
   turnstile_secret_key: string
   linuxdo_connect_client_secret: string
+  oidc_connect_client_secret: string
 }
 
 const form = reactive<SettingsForm>({
@@ -1943,8 +2539,8 @@ const form = reactive<SettingsForm>({
   hide_ccs_import_button: false,
   purchase_subscription_enabled: false,
   purchase_subscription_url: '',
-  sora_client_enabled: false,
   custom_menu_items: [] as Array<{id: string; label: string; icon_svg: string; url: string; visibility: 'user' | 'admin'; sort_order: number}>,
+  custom_endpoints: [] as Array<{name: string; endpoint: string; description: string}>,
   frontend_url: '',
   smtp_host: '',
   smtp_port: 587,
@@ -1965,6 +2561,30 @@ const form = reactive<SettingsForm>({
   linuxdo_connect_client_secret: '',
   linuxdo_connect_client_secret_configured: false,
   linuxdo_connect_redirect_url: '',
+  // Generic OIDC OAuth 登录
+  oidc_connect_enabled: false,
+  oidc_connect_provider_name: 'OIDC',
+  oidc_connect_client_id: '',
+  oidc_connect_client_secret: '',
+  oidc_connect_client_secret_configured: false,
+  oidc_connect_issuer_url: '',
+  oidc_connect_discovery_url: '',
+  oidc_connect_authorize_url: '',
+  oidc_connect_token_url: '',
+  oidc_connect_userinfo_url: '',
+  oidc_connect_jwks_url: '',
+  oidc_connect_scopes: 'openid email profile',
+  oidc_connect_redirect_url: '',
+  oidc_connect_frontend_redirect_url: '/auth/oidc/callback',
+  oidc_connect_token_auth_method: 'client_secret_post',
+  oidc_connect_use_pkce: false,
+  oidc_connect_validate_id_token: true,
+  oidc_connect_allowed_signing_algs: 'RS256,ES256,PS256',
+  oidc_connect_clock_skew_seconds: 120,
+  oidc_connect_require_email_verified: false,
+  oidc_connect_userinfo_email_path: '',
+  oidc_connect_userinfo_id_path: '',
+  oidc_connect_userinfo_username_path: '',
   // Model fallback
   enable_model_fallback: false,
   fallback_model_anthropic: 'claude-3-5-sonnet-20241022',
@@ -1983,7 +2603,11 @@ const form = reactive<SettingsForm>({
   min_claude_code_version: '',
   max_claude_code_version: '',
   // 分组隔离
-  allow_ungrouped_key_scheduling: false
+  allow_ungrouped_key_scheduling: false,
+  // Gateway forwarding behavior
+  enable_fingerprint_unification: true,
+  enable_metadata_passthrough: false,
+  enable_cch_signing: false
 })
 
 const defaultSubscriptionGroupOptions = computed<DefaultSubscriptionGroupOption[]>(() =>
@@ -2081,6 +2705,21 @@ async function setAndCopyLinuxdoRedirectUrl() {
   await copyToClipboard(url, t('admin.settings.linuxdo.redirectUrlSetAndCopied'))
 }
 
+const oidcRedirectUrlSuggestion = computed(() => {
+  if (typeof window === 'undefined') return ''
+  const origin =
+    window.location.origin || `${window.location.protocol}//${window.location.host}`
+  return `${origin}/api/v1/auth/oauth/oidc/callback`
+})
+
+async function setAndCopyOIDCRedirectUrl() {
+  const url = oidcRedirectUrlSuggestion.value
+  if (!url) return
+
+  form.oidc_connect_redirect_url = url
+  await copyToClipboard(url, t('admin.settings.oidc.redirectUrlSetAndCopied'))
+}
+
 // Custom menu item management
 function addMenuItem() {
   form.custom_menu_items.push({
@@ -2114,8 +2753,18 @@ function moveMenuItem(index: number, direction: -1 | 1) {
   })
 }
 
+// Custom endpoint management
+function addEndpoint() {
+  form.custom_endpoints.push({ name: '', endpoint: '', description: '' })
+}
+
+function removeEndpoint(index: number) {
+  form.custom_endpoints.splice(index, 1)
+}
+
 async function loadSettings() {
   loading.value = true
+  loadFailed.value = false
   try {
     const settings = await adminAPI.settings.getSettings()
     Object.assign(form, settings)
@@ -2133,9 +2782,12 @@ async function loadSettings() {
     )
     registrationEmailSuffixWhitelistDraft.value = ''
     form.smtp_password = ''
+    smtpPasswordManuallyEdited.value = false
     form.turnstile_secret_key = ''
     form.linuxdo_connect_client_secret = ''
+    form.oidc_connect_client_secret = ''
   } catch (error: any) {
+    loadFailed.value = true
     appStore.showError(
       t('admin.settings.failedToLoad') + ': ' + (error.message || t('common.unknownError'))
     )
@@ -2251,8 +2903,8 @@ async function saveSettings() {
       hide_ccs_import_button: form.hide_ccs_import_button,
       purchase_subscription_enabled: form.purchase_subscription_enabled,
       purchase_subscription_url: form.purchase_subscription_url,
-      sora_client_enabled: form.sora_client_enabled,
       custom_menu_items: form.custom_menu_items,
+      custom_endpoints: form.custom_endpoints,
       frontend_url: form.frontend_url,
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
@@ -2268,6 +2920,28 @@ async function saveSettings() {
       linuxdo_connect_client_id: form.linuxdo_connect_client_id,
       linuxdo_connect_client_secret: form.linuxdo_connect_client_secret || undefined,
       linuxdo_connect_redirect_url: form.linuxdo_connect_redirect_url,
+      oidc_connect_enabled: form.oidc_connect_enabled,
+      oidc_connect_provider_name: form.oidc_connect_provider_name,
+      oidc_connect_client_id: form.oidc_connect_client_id,
+      oidc_connect_client_secret: form.oidc_connect_client_secret || undefined,
+      oidc_connect_issuer_url: form.oidc_connect_issuer_url,
+      oidc_connect_discovery_url: form.oidc_connect_discovery_url,
+      oidc_connect_authorize_url: form.oidc_connect_authorize_url,
+      oidc_connect_token_url: form.oidc_connect_token_url,
+      oidc_connect_userinfo_url: form.oidc_connect_userinfo_url,
+      oidc_connect_jwks_url: form.oidc_connect_jwks_url,
+      oidc_connect_scopes: form.oidc_connect_scopes,
+      oidc_connect_redirect_url: form.oidc_connect_redirect_url,
+      oidc_connect_frontend_redirect_url: form.oidc_connect_frontend_redirect_url,
+      oidc_connect_token_auth_method: form.oidc_connect_token_auth_method,
+      oidc_connect_use_pkce: form.oidc_connect_use_pkce,
+      oidc_connect_validate_id_token: form.oidc_connect_validate_id_token,
+      oidc_connect_allowed_signing_algs: form.oidc_connect_allowed_signing_algs,
+      oidc_connect_clock_skew_seconds: form.oidc_connect_clock_skew_seconds,
+      oidc_connect_require_email_verified: form.oidc_connect_require_email_verified,
+      oidc_connect_userinfo_email_path: form.oidc_connect_userinfo_email_path,
+      oidc_connect_userinfo_id_path: form.oidc_connect_userinfo_id_path,
+      oidc_connect_userinfo_username_path: form.oidc_connect_userinfo_username_path,
       enable_model_fallback: form.enable_model_fallback,
       fallback_model_anthropic: form.fallback_model_anthropic,
       fallback_model_openai: form.fallback_model_openai,
@@ -2277,7 +2951,10 @@ async function saveSettings() {
       identity_patch_prompt: form.identity_patch_prompt,
       min_claude_code_version: form.min_claude_code_version,
       max_claude_code_version: form.max_claude_code_version,
-      allow_ungrouped_key_scheduling: form.allow_ungrouped_key_scheduling
+      allow_ungrouped_key_scheduling: form.allow_ungrouped_key_scheduling,
+      enable_fingerprint_unification: form.enable_fingerprint_unification,
+      enable_metadata_passthrough: form.enable_metadata_passthrough,
+      enable_cch_signing: form.enable_cch_signing
     }
     const updated = await adminAPI.settings.updateSettings(payload)
     Object.assign(form, updated)
@@ -2286,8 +2963,10 @@ async function saveSettings() {
     )
     registrationEmailSuffixWhitelistDraft.value = ''
     form.smtp_password = ''
+    smtpPasswordManuallyEdited.value = false
     form.turnstile_secret_key = ''
     form.linuxdo_connect_client_secret = ''
+    form.oidc_connect_client_secret = ''
     // Refresh cached settings so sidebar/header update immediately
     await appStore.fetchPublicSettings(true)
     await adminSettingsStore.fetch(true)
@@ -2304,11 +2983,12 @@ async function saveSettings() {
 async function testSmtpConnection() {
   testingSmtp.value = true
   try {
+    const smtpPasswordForTest = smtpPasswordManuallyEdited.value ? form.smtp_password : ''
     const result = await adminAPI.settings.testSmtpConnection({
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
       smtp_username: form.smtp_username,
-      smtp_password: form.smtp_password,
+      smtp_password: smtpPasswordForTest,
       smtp_use_tls: form.smtp_use_tls
     })
     // API returns { message: "..." } on success, errors are thrown as exceptions
@@ -2330,12 +3010,13 @@ async function sendTestEmail() {
 
   sendingTestEmail.value = true
   try {
+    const smtpPasswordForSend = smtpPasswordManuallyEdited.value ? form.smtp_password : ''
     const result = await adminAPI.settings.sendTestEmail({
       email: testEmailAddress.value,
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
       smtp_username: form.smtp_username,
-      smtp_password: form.smtp_password,
+      smtp_password: smtpPasswordForSend,
       smtp_from_email: form.smtp_from_email,
       smtp_from_name: form.smtp_from_name,
       smtp_use_tls: form.smtp_use_tls
@@ -2483,6 +3164,10 @@ async function loadRectifierSettings() {
   try {
     const settings = await adminAPI.settings.getRectifierSettings()
     Object.assign(rectifierForm, settings)
+    // 确保 patterns 是数组（旧数据可能为 null）
+    if (!Array.isArray(rectifierForm.apikey_signature_patterns)) {
+      rectifierForm.apikey_signature_patterns = []
+    }
   } catch (error: any) {
     console.error('Failed to load rectifier settings:', error)
   } finally {
@@ -2496,9 +3181,16 @@ async function saveRectifierSettings() {
     const updated = await adminAPI.settings.updateRectifierSettings({
       enabled: rectifierForm.enabled,
       thinking_signature_enabled: rectifierForm.thinking_signature_enabled,
-      thinking_budget_enabled: rectifierForm.thinking_budget_enabled
+      thinking_budget_enabled: rectifierForm.thinking_budget_enabled,
+      apikey_signature_enabled: rectifierForm.apikey_signature_enabled,
+      apikey_signature_patterns: rectifierForm.apikey_signature_patterns.filter(
+        (p) => p.trim() !== ''
+      )
     })
     Object.assign(rectifierForm, updated)
+    if (!Array.isArray(rectifierForm.apikey_signature_patterns)) {
+      rectifierForm.apikey_signature_patterns = []
+    }
     appStore.showSuccess(t('admin.settings.rectifier.saved'))
   } catch (error: any) {
     appStore.showError(
@@ -2528,8 +3220,46 @@ const betaDisplayNames: Record<string, string> = {
   'context-1m-2025-08-07': 'Context 1M'
 }
 
+// 快捷预设：按 beta_token 定义预设方案
+const betaPresets: Record<string, Array<{
+  label: string
+  description: string
+  action: 'pass' | 'filter' | 'block'
+  model_whitelist: string[]
+  fallback_action: 'pass' | 'filter' | 'block'
+}>> = {
+  'context-1m-2025-08-07': [
+    {
+      label: t('admin.settings.betaPolicy.presetOpusOnly'),
+      description: t('admin.settings.betaPolicy.presetOpusOnlyDesc'),
+      action: 'pass',
+      model_whitelist: ['claude-opus-4-6'],
+      fallback_action: 'filter',
+    },
+  ],
+}
+
+// 常用模型模式（具体 ID + 通配符示例）
+const commonModelPatterns = ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-opus-*', 'claude-sonnet-*']
+
 function getBetaDisplayName(token: string): string {
   return betaDisplayNames[token] || token
+}
+
+function applyBetaPreset(
+  rule: (typeof betaPolicyForm.rules)[number],
+  preset: { action: 'pass' | 'filter' | 'block'; model_whitelist: string[]; fallback_action: 'pass' | 'filter' | 'block' }
+) {
+  rule.action = preset.action
+  rule.model_whitelist = [...preset.model_whitelist]
+  rule.fallback_action = preset.fallback_action
+}
+
+function addQuickPattern(rule: (typeof betaPolicyForm.rules)[number], pattern: string) {
+  if (!rule.model_whitelist) rule.model_whitelist = []
+  if (!rule.model_whitelist.includes(pattern)) {
+    rule.model_whitelist.push(pattern)
+  }
 }
 
 async function loadBetaPolicySettings() {
@@ -2547,8 +3277,22 @@ async function loadBetaPolicySettings() {
 async function saveBetaPolicySettings() {
   betaPolicySaving.value = true
   try {
+    // Clean up empty patterns before saving
+    const cleanedRules = betaPolicyForm.rules.map(rule => {
+      const whitelist = rule.model_whitelist?.filter(p => p.trim() !== '')
+      const hasWhitelist = whitelist && whitelist.length > 0
+      return {
+        beta_token: rule.beta_token,
+        action: rule.action,
+        scope: rule.scope,
+        error_message: rule.error_message,
+        model_whitelist: hasWhitelist ? whitelist : undefined,
+        fallback_action: hasWhitelist ? (rule.fallback_action || 'pass') : undefined,
+        fallback_error_message: hasWhitelist && rule.fallback_action === 'block' ? rule.fallback_error_message : undefined,
+      }
+    })
     const updated = await adminAPI.settings.updateBetaPolicySettings({
-      rules: betaPolicyForm.rules
+      rules: cleanedRules
     })
     betaPolicyForm.rules = updated.rules
     appStore.showSuccess(t('admin.settings.betaPolicy.saved'))
