@@ -752,8 +752,8 @@ func TestOpenAIGatewayServiceRecordUsage_Gpt54LongContextBillsWholeSession(t *te
 	// 暗改：TotalCost 和 ActualCost 都使用倍率 +1 计算，两者相等
 	// InputCost 和 OutputCost 不含倍率，TotalCost 包含倍率
 	// 倍率 = 1.1（分组设置），实际计算倍率 = 1.1 + 1 = 2.1
-	expectedInput := 300000 * 2.5e-6 * 2.0  // 长上下文 2 倍，不含倍率
-	expectedOutput := 2000 * 15e-6 * 1.5    // 不含倍率
+	expectedInput := 300000 * 2.5e-6 * 2.0 // 长上下文 2 倍，不含倍率
+	expectedOutput := 2000 * 15e-6 * 1.5   // 不含倍率
 	require.InDelta(t, expectedInput, usageRepo.lastLog.InputCost, 1e-10)
 	require.InDelta(t, expectedOutput, usageRepo.lastLog.OutputCost, 1e-10)
 	// TotalCost 已包含倍率 +1（2.1 倍），ActualCost = TotalCost
