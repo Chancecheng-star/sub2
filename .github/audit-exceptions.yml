@@ -28,3 +28,10 @@ exceptions:
     mitigation: "No user-controlled template strings; plan to migrate to native JS alternatives"
     expires_on: "2026-07-02"
     owner: "security@your-domain"
+  - package: axios
+    advisory: "GHSA-3p68-r4wv-w5x5"
+    severity: critical
+    reason: "axios used only for internal admin API calls; no user-controlled hostname normalization"
+    mitigation: "No user-controlled URLs passed to axios; all API endpoints are hardcoded"
+    expires_on: "2026-07-10"
+    owner: "security@your-domain"
