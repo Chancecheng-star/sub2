@@ -115,6 +115,7 @@ export interface PublicSettings {
   oidc_oauth_enabled: boolean
   oidc_oauth_provider_name: string
   backend_mode_enabled: boolean
+  sora_client_enabled: boolean
   version: string
 }
 
