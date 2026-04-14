@@ -13,10 +13,10 @@ import (
 // PerformanceMonitorConfig 性能监控配置
 type PerformanceMonitorConfig struct {
 	Enabled              bool
-	SlowRequestThreshold int // 慢请求阈值（毫秒）
-	CPUThreshold         int // CPU 使用率阈值（%）
-	MemoryThreshold      int // 内存使用率阈值（%）
-	DiskThreshold        int // 磁盘使用率阈值（%）
+	SlowRequestThreshold int  // 慢请求阈值（毫秒）
+	CPUThreshold         int  // CPU 使用率阈值（%）
+	MemoryThreshold      int  // 内存使用率阈值（%）
+	DiskThreshold        int  // 磁盘使用率阈值（%）
 	EnablePoolStats      bool // 启用连接池统计
 	EnableMemoryStats    bool // 启用内存统计
 }
@@ -52,7 +52,7 @@ type SystemStatus struct {
 func GetSystemStatus() SystemStatus {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	
+
 	// 简化版本：只返回内存使用率
 	// 完整版本需要使用 github.com/shirou/gopsutil
 	return SystemStatus{
@@ -72,14 +72,14 @@ func PerformanceMonitor() gin.HandlerFunc {
 
 		// 记录请求开始时间
 		startTime := time.Now()
-		
+
 		// 执行请求
 		c.Next()
-		
+
 		// 计算请求耗时
 		latency := time.Since(startTime)
 		latencyMs := latency.Milliseconds()
-		
+
 		// 检查是否为慢请求
 		if latencyMs > int64(performanceMonitorConfig.SlowRequestThreshold) {
 			// 记录慢请求日志
@@ -90,7 +90,7 @@ func PerformanceMonitor() gin.HandlerFunc {
 			fmt.Printf("[SLOW REQUEST] %s %s %dms (threshold: %dms)\n",
 				c.Request.Method, slog, latencyMs, performanceMonitorConfig.SlowRequestThreshold)
 		}
-		
+
 		// 记录请求指标（可选：集成 Prometheus）
 		if performanceMonitorConfig.EnableMemoryStats {
 			var m runtime.MemStats
@@ -111,17 +111,17 @@ func SystemPerformanceCheck() gin.HandlerFunc {
 
 		// 检查系统性能
 		status := GetSystemStatus()
-		
+
 		// 检查内存
 		if performanceMonitorConfig.MemoryThreshold > 0 && status.MemoryUsage > float64(performanceMonitorConfig.MemoryThreshold) {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"error": fmt.Sprintf("system memory overloaded (current: %.1f%%, threshold: %d%%)", 
+				"error": fmt.Sprintf("system memory overloaded (current: %.1f%%, threshold: %d%%)",
 					status.MemoryUsage, performanceMonitorConfig.MemoryThreshold),
 			})
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }
