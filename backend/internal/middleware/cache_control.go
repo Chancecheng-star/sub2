@@ -36,13 +36,13 @@ func CacheControl() gin.HandlerFunc {
 func CacheControlWithConfig(config CacheControlConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
-		
+
 		// 构建 Cache-Control 头
 		cacheControl := buildCacheControl(config)
 		if cacheControl != "" {
 			c.Header("Cache-Control", cacheControl)
 		}
-		
+
 		// 禁止缓存敏感数据
 		if config.NoStore {
 			c.Header("Pragma", "no-cache")
@@ -54,7 +54,7 @@ func CacheControlWithConfig(config CacheControlConfig) gin.HandlerFunc {
 // buildCacheControl 构建 Cache-Control 头
 func buildCacheControl(config CacheControlConfig) string {
 	directives := []string{}
-	
+
 	if config.NoCache {
 		directives = append(directives, "no-cache")
 	}
@@ -70,7 +70,7 @@ func buildCacheControl(config CacheControlConfig) string {
 	if config.Public {
 		directives = append(directives, "public")
 	}
-	
+
 	return join(directives, ", ")
 }
 
@@ -79,23 +79,23 @@ func itoa(n int) string {
 	if n == 0 {
 		return "0"
 	}
-	
+
 	negative := false
 	if n < 0 {
 		negative = true
 		n = -n
 	}
-	
+
 	digits := []byte{}
 	for n > 0 {
 		digits = append([]byte{byte('0' + n%10)}, digits...)
 		n /= 10
 	}
-	
+
 	if negative {
 		digits = append([]byte{'-'}, digits...)
 	}
-	
+
 	return string(digits)
 }
 
@@ -107,19 +107,19 @@ func join(elems []string, sep string) string {
 	if len(elems) == 1 {
 		return elems[0]
 	}
-	
+
 	totalLen := len(elems) - 1
 	for _, elem := range elems {
 		totalLen += len(elem)
 	}
-	
+
 	b := make([]byte, 0, totalLen+len(sep))
 	b = append(b, elems[0]...)
 	for _, elem := range elems[1:] {
 		b = append(b, sep...)
 		b = append(b, elem...)
 	}
-	
+
 	return string(b)
 }
 

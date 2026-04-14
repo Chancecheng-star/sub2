@@ -44,7 +44,7 @@ func GzipWithConfig(config GzipConfig) gin.HandlerFunc {
 			return
 		}
 
-		gz := gzipPool.Get().(*gzip.Writer)
+		gz := gzipPool.Get().(*gzip.Writer) //nolint:errcheck // sync.Pool.Get() does not return error
 		defer gzipPool.Put(gz)
 
 		gz.Reset(c.Writer)

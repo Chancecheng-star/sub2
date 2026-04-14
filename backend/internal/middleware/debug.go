@@ -46,7 +46,7 @@ func DebugWithConfig(config DebugConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 记录请求开始
 		startTime := time.Now()
-		
+
 		// 记录请求详情
 		if config.VerboseHeaders {
 			// 记录所有请求头
@@ -66,7 +66,7 @@ func DebugWithConfig(config DebugConfig) gin.HandlerFunc {
 
 		// 记录响应详情
 		latency := time.Since(startTime)
-		
+
 		slog.Debug("request completed",
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,

@@ -11,7 +11,7 @@ func ResponseTime() gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 		latency := time.Since(start)
-		
+
 		c.Header("X-Response-Time", latency.String())
 	}
 }

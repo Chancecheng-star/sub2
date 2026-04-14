@@ -24,9 +24,9 @@ type LogSamplingConfig struct {
 // DefaultLogSamplingConfig 默认配置
 var DefaultLogSamplingConfig = LogSamplingConfig{
 	Enabled:         false,
-	SampleRate:      0.1,      // 10% 采样率
-	SlowRequestRate: 1.0,      // 慢请求 100% 记录
-	SlowThresholdMs: 1000,     // 1 秒算慢请求
+	SampleRate:      0.1,  // 10% 采样率
+	SlowRequestRate: 1.0,  // 慢请求 100% 记录
+	SlowThresholdMs: 1000, // 1 秒算慢请求
 }
 
 // LogSampling 日志采样中间件
@@ -45,10 +45,10 @@ func LogSamplingWithConfig(config LogSamplingConfig) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		startTime := time.Now()
-		
+
 		// 决定是否采样此请求
 		shouldSample := shouldSampleRequest(config.SampleRate)
-		
+
 		// 记录请求开始（仅采样请求）
 		if shouldSample {
 			slog.Info("request started",
