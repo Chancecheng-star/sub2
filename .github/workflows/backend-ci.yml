@@ -42,8 +42,8 @@ jobs:
         run: |
           go version | grep -q 'go1.26.2'
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v2.9
+          version: v1.61.0
           args: --timeout=30m
           working-directory: backend
