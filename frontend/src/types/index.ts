@@ -105,8 +105,6 @@ export interface PublicSettings {
   home_content: string
   hide_ccs_import_button: boolean
   payment_enabled: boolean
-  purchase_subscription_enabled: boolean
-  purchase_subscription_url: string
   table_default_page_size: number
   table_page_size_options: number[]
   custom_menu_items: CustomMenuItem[]
@@ -115,7 +113,6 @@ export interface PublicSettings {
   oidc_oauth_enabled: boolean
   oidc_oauth_provider_name: string
   backend_mode_enabled: boolean
-  sora_client_enabled: boolean
   version: string
 }
 
