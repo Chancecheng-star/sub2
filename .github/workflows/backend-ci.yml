@@ -22,6 +22,8 @@ jobs:
           go version | grep -q 'go1.26.2'
       - name: Unit tests
         working-directory: backend
+        env:
+          GOOGLE_CLOUD_PROJECT: test-project
         run: make test-unit
       - name: Integration tests
         working-directory: backend
