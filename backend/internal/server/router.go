@@ -61,11 +61,6 @@ func SetupRouter(
 		return nil
 	}))
 
-	// 新增优化中间件
-	r.Use(middleware2.ResponseTime())
-	r.Use(middleware2.RequestID())
-	r.Use(middleware2.CacheControl())
-
 	// Serve embedded frontend with settings injection if available
 	if web.HasEmbeddedFrontend() {
 		frontendServer, err := web.NewFrontendServer(settingService)
@@ -108,11 +103,6 @@ func registerRoutes(
 	// 通用路由（健康检查、状态等）
 	routes.RegisterCommonRoutes(r)
 
-	// 注册健康检查路由（完整版本）
-	if h.Health != nil {
-		routes.RegisterHealthRoutes(r, h.Health)
-	}
-
 	// API v1
 	v1 := r.Group("/api/v1")
 
@@ -121,4 +111,5 @@ func registerRoutes(
 	routes.RegisterUserRoutes(v1, h, jwtAuth, settingService)
 	routes.RegisterAdminRoutes(v1, h, adminAuth)
 	routes.RegisterGatewayRoutes(r, h, apiKeyAuth, apiKeyService, subscriptionService, opsService, settingService, cfg)
+	routes.RegisterPaymentRoutes(v1, h.Payment, h.PaymentWebhook, h.Admin.Payment, jwtAuth, adminAuth, settingService)
 }
