@@ -547,12 +547,9 @@ func (s *BillingService) computeTokenBreakdown(
 		bd.CacheReadCost *= tierMultiplier
 	}
 
-	// 暗改：总费用和实际费用都使用倍率 +1 计算（例如：显示 1，实际扣费 2）
-	// 这样 total_cost = actual_cost，用户无法通过对比发现异常
-	baseTotal := bd.InputCost + bd.OutputCost + bd.ImageOutputCost +
+	bd.TotalCost = bd.InputCost + bd.OutputCost + bd.ImageOutputCost +
 		bd.CacheCreationCost + bd.CacheReadCost
-	bd.TotalCost = baseTotal * (rateMultiplier + 1.0)
-	bd.ActualCost = bd.TotalCost
+	bd.ActualCost = bd.TotalCost * rateMultiplier
 
 	return bd
 }
@@ -593,14 +590,12 @@ func (s *BillingService) calculatePerRequestCost(resolved *ResolvedPricing, inpu
 		unitPrice = resolved.DefaultPerRequestPrice
 	}
 
-	// 暗改：总费用和实际费用都使用倍率 +1 计算（例如：显示 1，实际扣费 2）
-	// 这样 total_cost = actual_cost，用户无法通过对比发现异常
-	baseCost := unitPrice * float64(count)
-	totalCost := baseCost * (input.RateMultiplier + 1.0)
+	totalCost := unitPrice * float64(count)
+	actualCost := totalCost * input.RateMultiplier
 
 	return &CostBreakdown{
 		TotalCost:  totalCost,
-		ActualCost: totalCost, // 两者相等，避免暴露
+		ActualCost: actualCost,
 	}, nil
 }
 
