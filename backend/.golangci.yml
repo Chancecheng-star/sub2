@@ -9,8 +9,3 @@ linters:
   enable:
     - errcheck
     - govet
-    - staticcheck
-
-issues:
-  exclude:
-    - SA1019
