@@ -243,15 +243,15 @@ type PricingConfig struct {
 }
 
 type ServerConfig struct {
-	Host               string    `mapstructure:"host"`
-	Port               int       `mapstructure:"port"`
-	Mode               string    `mapstructure:"mode"`
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
+	Mode string `mapstructure:"mode"`
 	// ====== 性能监控配置（2026-04-13）======
 	// SlowRequestThreshold: 慢请求阈值（毫秒），超过此阈值的请求会被记录
 	SlowRequestThreshold int `mapstructure:"slow_request_threshold"`
 	// EnablePerformanceMonitor: 是否启用性能监控
 	EnablePerformanceMonitor bool `mapstructure:"enable_performance_monitor"`
-                  // debug/release
+	// debug/release
 	FrontendURL        string    `mapstructure:"frontend_url"`          // 前端基础 URL，用于生成邮件中的外部链接
 	ReadHeaderTimeout  int       `mapstructure:"read_header_timeout"`   // 读取请求头超时（秒）
 	IdleTimeout        int       `mapstructure:"idle_timeout"`          // 空闲连接超时（秒）
@@ -1142,8 +1142,8 @@ func setDefaults() {
 	viper.SetDefault("server.max_request_body_size", int64(256*1024*1024))
 
 	// Server - 性能监控
-	viper.SetDefault("server.slow_request_threshold", 5000)         // 5 秒慢请求阈值
-	viper.SetDefault("server.enable_performance_monitor", true)     // 启用性能监控
+	viper.SetDefault("server.slow_request_threshold", 5000)     // 5 秒慢请求阈值
+	viper.SetDefault("server.enable_performance_monitor", true) // 启用性能监控
 	// H2C 默认配置
 	viper.SetDefault("server.h2c.enabled", false)
 	viper.SetDefault("server.h2c.max_concurrent_streams", uint32(50))      // 50 个并发流
@@ -1385,14 +1385,14 @@ func setDefaults() {
 	viper.SetDefault("gateway.force_codex_cli", false)
 	viper.SetDefault("gateway.openai_passthrough_allow_timeout_headers", false)
 	// 请求体透传配置（性能优化：减少不必要的请求体处理开销）
-	viper.SetDefault("gateway.body_passthrough_enabled", false)        // false=重写 metadata, true=完全透传
-	viper.SetDefault("gateway.metadata_rewrite_enabled", true)         // true=重写 metadata.user_id
-	viper.SetDefault("gateway.cch_signature_enabled", true)            // true=启用 CCH 签名验证
-	viper.SetDefault("gateway.version_sync_enabled", true)             // true=启用版本同步检查
+	viper.SetDefault("gateway.body_passthrough_enabled", false) // false=重写 metadata, true=完全透传
+	viper.SetDefault("gateway.metadata_rewrite_enabled", true)  // true=重写 metadata.user_id
+	viper.SetDefault("gateway.cch_signature_enabled", true)     // true=启用 CCH 签名验证
+	viper.SetDefault("gateway.version_sync_enabled", true)      // true=启用版本同步检查
 	// 灵活超时配置（性能优化：支持高并发场景调优）
-	viper.SetDefault("gateway.dial_timeout_seconds", 5)                // 连接建立超时（秒）
-	viper.SetDefault("gateway.tls_handshake_timeout_seconds", 5)       // TLS 握手超时（秒）
-	viper.SetDefault("gateway.request_total_timeout_seconds", 120)     // 总请求超时（秒）
+	viper.SetDefault("gateway.dial_timeout_seconds", 5)            // 连接建立超时（秒）
+	viper.SetDefault("gateway.tls_handshake_timeout_seconds", 5)   // TLS 握手超时（秒）
+	viper.SetDefault("gateway.request_total_timeout_seconds", 120) // 总请求超时（秒）
 	// OpenAI Responses WebSocket（默认开启；可通过 force_http 紧急回滚）
 	viper.SetDefault("gateway.openai_ws.enabled", true)
 	viper.SetDefault("gateway.openai_ws.mode_router_v2_enabled", false)

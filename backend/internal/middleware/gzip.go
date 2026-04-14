@@ -9,8 +9,8 @@ import (
 )
 
 type GzipConfig struct {
-	Level              int
-	MinLength          int
+	Level                int
+	MinLength            int
 	ExcludedContentTypes []string
 }
 
@@ -46,9 +46,11 @@ func GzipWithConfig(config GzipConfig) gin.HandlerFunc {
 
 		gz := gzipPool.Get().(*gzip.Writer)
 		defer gzipPool.Put(gz)
-		
+
 		gz.Reset(c.Writer)
-		defer gz.Close()
+		defer func() {
+			_ = gz.Close() // ignore error on close
+		}()
 
 		c.Writer = &gzipResponseWriter{
 			ResponseWriter: c.Writer,
@@ -75,19 +77,19 @@ type gzipResponseWriter struct {
 func (w *gzipResponseWriter) Write(b []byte) (int, error) {
 	if !w.written {
 		w.written = true
-		
+
 		contentType := w.Header().Get("Content-Type")
 		for _, excluded := range w.excludedTypes {
 			if strings.HasPrefix(contentType, excluded) {
 				return w.ResponseWriter.Write(b)
 			}
 		}
-		
+
 		if len(b) < w.minLength {
 			return w.ResponseWriter.Write(b)
 		}
 	}
-	
+
 	return w.Writer.Write(b)
 }
 

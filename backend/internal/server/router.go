@@ -60,7 +60,7 @@ func SetupRouter(
 		}
 		return nil
 	}))
-	
+
 	// 新增优化中间件
 	r.Use(middleware2.ResponseTime())
 	r.Use(middleware2.RequestID())
@@ -107,7 +107,7 @@ func registerRoutes(
 ) {
 	// 通用路由（健康检查、状态等）
 	routes.RegisterCommonRoutes(r)
-	
+
 	// 注册健康检查路由（完整版本）
 	if h.Health != nil {
 		routes.RegisterHealthRoutes(r, h.Health)
