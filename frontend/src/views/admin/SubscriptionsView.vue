@@ -174,8 +174,6 @@
           :data="subscriptions"
           :loading="loading"
           :server-side-sort="true"
-          default-sort-key="created_at"
-          default-sort-order="desc"
           @sort="handleSort"
         >
           <template #cell-user="{ row }">

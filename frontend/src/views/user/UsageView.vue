@@ -149,15 +149,7 @@
       </template>
 
       <template #table>
-        <DataTable
-          :columns="columns"
-          :data="usageLogs"
-          :loading="loading"
-          :server-side-sort="true"
-          default-sort-key="created_at"
-          default-sort-order="desc"
-          @sort="handleSort"
-        >
+        <DataTable :columns="columns" :data="usageLogs" :loading="loading">
           <template #cell-api_key="{ row }">
             <span class="text-sm text-gray-900 dark:text-white">{{
               row.api_key?.name || '-'
@@ -606,10 +598,6 @@ const pagination = reactive({
   total: 0,
   pages: 0
 })
-const sortState = reactive({
-  sort_by: 'created_at',
-  sort_order: 'desc' as 'asc' | 'desc'
-})
 
 const formatDuration = (ms: number): string => {
   if (ms < 1000) return `${ms.toFixed(0)}ms`
@@ -672,18 +660,6 @@ const formatTokens = (value: number): string => {
   return value.toLocaleString()
 }
 
-type UsageTableQueryParams = UsageQueryParams & {
-  sort_by?: string
-  sort_order?: 'asc' | 'desc'
-}
-
-const buildUsageQueryParams = (page: number, pageSize: number): UsageTableQueryParams => ({
-  page,
-  page_size: pageSize,
-  ...filters.value,
-  sort_by: sortState.sort_by,
-  sort_order: sortState.sort_order
-})
 
 const loadUsageLogs = async () => {
   if (abortController) {
@@ -694,10 +670,13 @@ const loadUsageLogs = async () => {
   const { signal } = currentAbortController
   loading.value = true
   try {
-    const response = await usageAPI.query(
-      buildUsageQueryParams(pagination.page, pagination.page_size),
-      { signal }
-    )
+    const params: UsageQueryParams = {
+      page: pagination.page,
+      page_size: pagination.page_size,
+      ...filters.value
+    }
+
+    const response = await usageAPI.query(params, { signal })
     if (signal.aborted) {
       return
     }
@@ -779,13 +758,6 @@ const handlePageSizeChange = (pageSize: number) => {
   loadUsageLogs()
 }
 
-const handleSort = (key: string, order: 'asc' | 'desc') => {
-  sortState.sort_by = key
-  sortState.sort_order = order
-  pagination.page = 1
-  loadUsageLogs()
-}
-
 /**
  * Escape CSV value to prevent injection and handle special characters
  */
@@ -823,7 +795,12 @@ const exportToCSV = async () => {
     const totalRequests = Math.ceil(pagination.total / pageSize)
 
     for (let page = 1; page <= totalRequests; page++) {
-      const response = await usageAPI.query(buildUsageQueryParams(page, pageSize))
+      const params: UsageQueryParams = {
+        page: page,
+        page_size: pageSize,
+        ...filters.value
+      }
+      const response = await usageAPI.query(params)
       allLogs.push(...response.items)
     }
 

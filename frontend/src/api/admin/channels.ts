@@ -83,8 +83,6 @@ export async function list(
   filters?: {
     status?: string
     search?: string
-    sort_by?: string
-    sort_order?: 'asc' | 'desc'
   },
   options?: { signal?: AbortSignal }
 ): Promise<PaginatedResponse<Channel>> {

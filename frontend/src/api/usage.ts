@@ -91,7 +91,7 @@ export async function list(
  * @returns Paginated list of usage logs
  */
 export async function query(
-  params: UsageQueryParams & { sort_by?: string; sort_order?: 'asc' | 'desc' },
+  params: UsageQueryParams,
   config: { signal?: AbortSignal } = {}
 ): Promise<PaginatedResponse<UsageLog>> {
   const { data } = await apiClient.get<PaginatedResponse<UsageLog>>('/usage', {

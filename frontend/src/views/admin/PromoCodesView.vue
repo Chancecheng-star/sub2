@@ -39,15 +39,7 @@
       </template>
 
       <template #table>
-        <DataTable
-          :columns="columns"
-          :data="codes"
-          :loading="loading"
-          :server-side-sort="true"
-          default-sort-key="created_at"
-          default-sort-order="desc"
-          @sort="handleSort"
-        >
+        <DataTable :columns="columns" :data="codes" :loading="loading">
           <template #cell-code="{ value }">
             <div class="flex items-center space-x-2">
               <code class="font-mono text-sm text-gray-900 dark:text-gray-100">{{ value }}</code>
@@ -357,6 +349,7 @@
             :page="usagesPage"
             :total="usagesTotal"
             :page-size="usagesPageSize"
+            :page-size-options="[10, 20, 50]"
             @update:page="handleUsagesPageChange"
             @update:page-size="(size: number) => { usagesPageSize = size; usagesPage = 1; loadUsages() }"
           />
@@ -424,10 +417,6 @@ const pagination = reactive({
   page: 1,
   page_size: getPersistedPageSize(),
   total: 0
-})
-const sortState = reactive({
-  sort_by: 'created_at',
-  sort_order: 'desc' as 'asc' | 'desc'
 })
 
 // Dialogs
@@ -525,29 +514,19 @@ const loadCodes = async () => {
       pagination.page_size,
       {
         status: filters.status || undefined,
-        search: searchQuery.value || undefined,
-        sort_by: sortState.sort_by,
-        sort_order: sortState.sort_order
-      },
-      { signal: currentController.signal }
+        search: searchQuery.value || undefined
+      }
     )
-    if (currentController.signal.aborted || abortController !== currentController) return
+    if (currentController.signal.aborted) return
 
     codes.value = response.items
     pagination.total = response.total
   } catch (error: any) {
-    if (
-      currentController.signal.aborted ||
-      abortController !== currentController ||
-      error?.name === 'AbortError' ||
-      error?.code === 'ERR_CANCELED'
-    ) {
-      return
-    }
+    if (currentController.signal.aborted || error?.name === 'AbortError') return
     appStore.showError(t('admin.promo.failedToLoad'))
     console.error('Error loading promo codes:', error)
   } finally {
-    if (abortController === currentController) {
+    if (abortController === currentController && !currentController.signal.aborted) {
       loading.value = false
       abortController = null
     }
@@ -570,13 +549,6 @@ const handlePageChange = (page: number) => {
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.page_size = pageSize
-  pagination.page = 1
-  loadCodes()
-}
-
-const handleSort = (key: string, order: 'asc' | 'desc') => {
-  sortState.sort_by = key
-  sortState.sort_order = order
   pagination.page = 1
   loadCodes()
 }

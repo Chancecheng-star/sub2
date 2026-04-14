@@ -89,15 +89,7 @@
 
       <template #table>
         <div ref="proxyTableRef" class="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <DataTable
-          :columns="columns"
-          :data="proxies"
-          :loading="loading"
-          :server-side-sort="true"
-          default-sort-key="id"
-          default-sort-order="desc"
-          @sort="handleSort"
-        >
+        <DataTable :columns="columns" :data="proxies" :loading="loading">
           <template #header-select>
             <input
               type="checkbox"
@@ -954,10 +946,6 @@ const pagination = reactive({
   total: 0,
   pages: 0
 })
-const sortState = reactive({
-  sort_by: 'id',
-  sort_order: 'desc' as 'asc' | 'desc'
-})
 
 const showCreateModal = ref(false)
 const createPasswordVisible = ref(false)
@@ -1062,14 +1050,6 @@ const toggleSelectAllVisible = (event: Event) => {
   toggleVisible(target.checked)
 }
 
-const buildProxyQueryFilters = () => ({
-  protocol: filters.protocol || undefined,
-  status: (filters.status || undefined) as 'active' | 'inactive' | undefined,
-  search: searchQuery.value || undefined,
-  sort_by: sortState.sort_by,
-  sort_order: sortState.sort_order
-})
-
 const loadProxies = async () => {
   if (abortController) {
     abortController.abort()
@@ -1078,12 +1058,11 @@ const loadProxies = async () => {
   abortController = currentAbortController
   loading.value = true
   try {
-    const response = await adminAPI.proxies.list(
-      pagination.page,
-      pagination.page_size,
-      buildProxyQueryFilters(),
-      { signal: currentAbortController.signal }
-    )
+    const response = await adminAPI.proxies.list(pagination.page, pagination.page_size, {
+      protocol: filters.protocol || undefined,
+      status: filters.status as any,
+      search: searchQuery.value || undefined
+    }, { signal: currentAbortController.signal })
     if (currentAbortController.signal.aborted || abortController !== currentAbortController) {
       return
     }
@@ -1120,13 +1099,6 @@ const handlePageChange = (page: number) => {
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.page_size = pageSize
-  pagination.page = 1
-  loadProxies()
-}
-
-const handleSort = (key: string, order: 'asc' | 'desc') => {
-  sortState.sort_by = key
-  sortState.sort_order = order
   pagination.page = 1
   loadProxies()
 }
@@ -1609,9 +1581,7 @@ const fetchAllProxiesForBatch = async (): Promise<Proxy[]> => {
       {
         protocol: filters.protocol || undefined,
         status: filters.status as any,
-        search: searchQuery.value || undefined,
-        sort_by: sortState.sort_by,
-        sort_order: sortState.sort_order
+        search: searchQuery.value || undefined
       }
     )
     result.push(...response.items)
@@ -1719,7 +1689,11 @@ const handleExportData = async () => {
       selectedCount.value > 0
         ? { ids: Array.from(selectedProxyIds.value) }
         : {
-            filters: buildProxyQueryFilters()
+            filters: {
+              protocol: filters.protocol || undefined,
+              status: (filters.status || undefined) as 'active' | 'inactive' | undefined,
+              search: searchQuery.value || undefined
+            }
           }
     )
     const timestamp = formatExportTimestamp()

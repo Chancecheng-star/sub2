@@ -512,6 +512,7 @@ onMounted(async () => {
         :total="total"
         :page="page"
         :page-size="pageSize"
+        :page-size-options="[10, 20, 50, 100, 200]"
         @update:page="onPageChange"
         @update:page-size="onPageSizeChange"
       />

@@ -81,8 +81,6 @@ export interface AdminUsageQueryParams extends UsageQueryParams {
   user_id?: number
   exact_total?: boolean
   billing_mode?: string
-  sort_by?: string
-  sort_order?: 'asc' | 'desc'
 }
 
 // ==================== API Functions ====================

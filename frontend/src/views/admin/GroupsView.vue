@@ -81,15 +81,7 @@
       </template>
 
       <template #table>
-        <DataTable
-          :columns="columns"
-          :data="groups"
-          :loading="loading"
-          :server-side-sort="true"
-          default-sort-key="sort_order"
-          default-sort-order="asc"
-          @sort="handleSort"
-        >
+        <DataTable :columns="columns" :data="groups" :loading="loading">
           <template #cell-name="{ value }">
             <span class="font-medium text-gray-900 dark:text-white">{{
               value
@@ -2932,10 +2924,6 @@ const pagination = reactive({
   total: 0,
   pages: 0,
 });
-const sortState = reactive({
-  sort_by: "sort_order",
-  sort_order: "asc" as "asc" | "desc",
-});
 
 let abortController: AbortController | null = null;
 
@@ -3302,8 +3290,6 @@ const loadGroups = async () => {
           ? filters.is_exclusive === "true"
           : undefined,
         search: searchQuery.value.trim() || undefined,
-        sort_by: sortState.sort_by,
-        sort_order: sortState.sort_order,
       },
       { signal },
     );
@@ -3402,13 +3388,6 @@ const handlePageChange = (page: number) => {
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.page_size = pageSize;
-  pagination.page = 1;
-  loadGroups();
-};
-
-const handleSort = (key: string, order: 'asc' | 'desc') => {
-  sortState.sort_by = key;
-  sortState.sort_order = order;
   pagination.page = 1;
   loadGroups();
 };

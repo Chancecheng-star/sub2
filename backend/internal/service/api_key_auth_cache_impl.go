@@ -13,8 +13,6 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-const apiKeyAuthSnapshotVersion = 3
-
 type apiKeyAuthCacheConfig struct {
 	l1Size        int
 	l1TTL         time.Duration
@@ -194,9 +192,6 @@ func (s *APIKeyService) applyAuthCacheEntry(key string, entry *APIKeyAuthCacheEn
 	if entry.Snapshot == nil {
 		return nil, false, nil
 	}
-	if entry.Snapshot.Version != apiKeyAuthSnapshotVersion {
-		return nil, false, nil
-	}
 	return s.snapshotToAPIKey(key, entry.Snapshot), true, nil
 }
 
@@ -205,7 +200,6 @@ func (s *APIKeyService) snapshotFromAPIKey(apiKey *APIKey) *APIKeyAuthSnapshot {
 		return nil
 	}
 	snapshot := &APIKeyAuthSnapshot{
-		Version:     apiKeyAuthSnapshotVersion,
 		APIKeyID:    apiKey.ID,
 		UserID:      apiKey.UserID,
 		GroupID:     apiKey.GroupID,
@@ -249,7 +243,6 @@ func (s *APIKeyService) snapshotFromAPIKey(apiKey *APIKey) *APIKeyAuthSnapshot {
 			SupportedModelScopes:            apiKey.Group.SupportedModelScopes,
 			AllowMessagesDispatch:           apiKey.Group.AllowMessagesDispatch,
 			DefaultMappedModel:              apiKey.Group.DefaultMappedModel,
-			MessagesDispatchModelConfig:     apiKey.Group.MessagesDispatchModelConfig,
 		}
 	}
 	return snapshot
@@ -305,7 +298,6 @@ func (s *APIKeyService) snapshotToAPIKey(key string, snapshot *APIKeyAuthSnapsho
 			SupportedModelScopes:            snapshot.Group.SupportedModelScopes,
 			AllowMessagesDispatch:           snapshot.Group.AllowMessagesDispatch,
 			DefaultMappedModel:              snapshot.Group.DefaultMappedModel,
-			MessagesDispatchModelConfig:     snapshot.Group.MessagesDispatchModelConfig,
 		}
 	}
 	s.compileAPIKeyIPRules(apiKey)

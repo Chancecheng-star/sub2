@@ -196,6 +196,7 @@
             :total="localEntries.length"
             :page="currentPage"
             :page-size="pageSize"
+            :page-size-options="[10, 20, 50]"
             @update:page="currentPage = $event"
             @update:pageSize="handlePageSizeChange"
           />

@@ -17,8 +17,6 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/usersubscription"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/Wei-Shaw/sub2api/internal/service"
-
-	entsql "entgo.io/ent/dialect/sql"
 )
 
 type userRepository struct {
@@ -226,14 +224,11 @@ func (r *userRepository) ListWithFilters(ctx context.Context, params pagination.
 		return nil, nil, err
 	}
 
-	usersQuery := q.
+	users, err := q.
 		Offset(params.Offset()).
-		Limit(params.Limit())
-	for _, order := range userListOrder(params) {
-		usersQuery = usersQuery.Order(order)
-	}
-
-	users, err := usersQuery.All(ctx)
+		Limit(params.Limit()).
+		Order(dbent.Desc(dbuser.FieldID)).
+		All(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -284,50 +279,6 @@ func (r *userRepository) ListWithFilters(ctx context.Context, params pagination.
 	}
 
 	return outUsers, paginationResultFromTotal(int64(total), params), nil
-}
-
-func userListOrder(params pagination.PaginationParams) []func(*entsql.Selector) {
-	sortBy := strings.ToLower(strings.TrimSpace(params.SortBy))
-	sortOrder := params.NormalizedSortOrder(pagination.SortOrderDesc)
-
-	var field string
-	defaultField := true
-	switch sortBy {
-	case "email":
-		field = dbuser.FieldEmail
-		defaultField = false
-	case "username":
-		field = dbuser.FieldUsername
-		defaultField = false
-	case "role":
-		field = dbuser.FieldRole
-		defaultField = false
-	case "balance":
-		field = dbuser.FieldBalance
-		defaultField = false
-	case "concurrency":
-		field = dbuser.FieldConcurrency
-		defaultField = false
-	case "status":
-		field = dbuser.FieldStatus
-		defaultField = false
-	case "created_at":
-		field = dbuser.FieldCreatedAt
-		defaultField = false
-	default:
-		field = dbuser.FieldID
-	}
-
-	if sortOrder == pagination.SortOrderAsc {
-		if defaultField && field == dbuser.FieldID {
-			return []func(*entsql.Selector){dbent.Asc(dbuser.FieldID)}
-		}
-		return []func(*entsql.Selector){dbent.Asc(field), dbent.Asc(dbuser.FieldID)}
-	}
-	if defaultField && field == dbuser.FieldID {
-		return []func(*entsql.Selector){dbent.Desc(dbuser.FieldID)}
-	}
-	return []func(*entsql.Selector){dbent.Desc(field), dbent.Desc(dbuser.FieldID)}
 }
 
 // filterUsersByAttributes returns user IDs that match ALL the given attribute filters
