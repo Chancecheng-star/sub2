@@ -21,7 +21,7 @@ var DefaultGzipConfig = GzipConfig{
 }
 
 var gzipPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return gzip.NewWriter(nil)
 	},
 }
