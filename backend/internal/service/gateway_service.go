@@ -1,4 +1,4 @@
-﻿package service
+package service
 
 import (
 	"bufio"
@@ -351,12 +351,12 @@ var ErrClaudeCodeOnly = errors.New("this group only allows Claude Code clients")
 // blockedHeaders 禁止的 headers（黑名单模式）
 // 只拦截危险头，其他头全部放行，提高兼容性
 var blockedHeaders = map[string]bool{
-	"x-forwarded-for":       true, // 防止 IP 伪造
-	"x-real-ip":             true, // 防止 IP 伪造
-	"x-client-ip":           true, // 防止 IP 伪造
-	"forwarded":             true, // 防止代理信息泄露
-	"x-forwarded-host":      true, // 防止主机伪造
-	"x-forwarded-proto":     true, // 防止协议伪造
+	"x-forwarded-for":   true, // 防止 IP 伪造
+	"x-real-ip":         true, // 防止 IP 伪造
+	"x-client-ip":       true, // 防止 IP 伪造
+	"forwarded":         true, // 防止代理信息泄露
+	"x-forwarded-host":  true, // 防止主机伪造
+	"x-forwarded-proto": true, // 防止协议伪造
 }
 
 // isHeaderAllowed 检查 header 是否允许（黑名单模式）
@@ -4778,7 +4778,7 @@ func (s *GatewayService) buildUpstreamRequestAnthropicAPIKeyPassthrough(
 
 	if c != nil && c.Request != nil {
 		for key, values := range c.Request.Header {
-			if (!isHeaderAllowed(key)) {
+			if !isHeaderAllowed(key) {
 				continue
 			}
 			wireKey := resolveWireCasing(key)
@@ -5597,7 +5597,7 @@ func (s *GatewayService) buildUpstreamRequest(ctx context.Context, c *gin.Contex
 
 	// 白名单透传headers（恢复真实 wire casing）
 	for key, values := range clientHeaders {
-			if (isHeaderAllowed(key)) {
+		if isHeaderAllowed(key) {
 			wireKey := resolveWireCasing(key)
 			for _, v := range values {
 				addHeaderRaw(req.Header, wireKey, v)
@@ -8407,7 +8407,7 @@ func (s *GatewayService) buildCountTokensRequestAnthropicAPIKeyPassthrough(
 
 	if c != nil && c.Request != nil {
 		for key, values := range c.Request.Header {
-			if (!isHeaderAllowed(key)) {
+			if !isHeaderAllowed(key) {
 				continue
 			}
 			wireKey := resolveWireCasing(key)
@@ -8507,7 +8507,7 @@ func (s *GatewayService) buildCountTokensRequest(ctx context.Context, c *gin.Con
 
 	// 白名单透传 headers（恢复真实 wire casing）
 	for key, values := range clientHeaders {
-			if (isHeaderAllowed(key)) {
+		if isHeaderAllowed(key) {
 			wireKey := resolveWireCasing(key)
 			for _, v := range values {
 				addHeaderRaw(req.Header, wireKey, v)

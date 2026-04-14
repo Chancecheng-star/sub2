@@ -44,7 +44,7 @@ func RegisterCommonRoutes(r *gin.Engine) {
 func RegisterHealthRoutes(r *gin.Engine, h *handler.HealthHandler) {
 	// 完整健康检查
 	r.GET("/healthz", h.Health)
-	
+
 	// 就绪检查
 	r.GET("/ready", h.Ready)
 }
