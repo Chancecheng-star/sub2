@@ -1,0 +1,5 @@
+option batch abort
+option confirm off
+open sftp://root:Cyf990314@154.9.27.78
+put "D:\sub2api-main\backend\bin\server_update" "/root/sub2api/backend/bin/server"
+exit
