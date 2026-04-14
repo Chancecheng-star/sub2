@@ -1,0 +1,25 @@
+# sub2api OAuth Account Creator Configuration
+
+# sub2api 后端地址
+sub2api_url: "http://localhost:8080"
+
+# sub2api Admin API Token (从管理后台获取)
+admin_token: "YOUR_ADMIN_TOKEN_HERE"
+
+# 默认代理 ID (可选，用于 OAuth 请求)
+default_proxy_id: null
+
+# 默认倍率
+default_rate_multiplier: 1.0
+
+# 默认并发数
+default_concurrency: 5
+
+# 默认优先级
+default_priority: 1
+
+# 回调端口 (必须与 OAuth 重定向 URI 匹配)
+callback_port: 1455
+
+# 是否加密存储邮箱密码
+encrypt_credentials: true

@@ -1,4 +1,4 @@
-package service
+﻿package service
 
 import (
 	"bufio"
@@ -348,29 +348,21 @@ var ErrNoAvailableAccounts = errors.New("no available accounts")
 // ErrClaudeCodeOnly 表示分组仅允许 Claude Code 客户端访问
 var ErrClaudeCodeOnly = errors.New("this group only allows Claude Code clients")
 
-// allowedHeaders 白名单headers（参考CRS项目）
-var allowedHeaders = map[string]bool{
-	"accept":                                    true,
-	"x-stainless-retry-count":                   true,
-	"x-stainless-timeout":                       true,
-	"x-stainless-lang":                          true,
-	"x-stainless-package-version":               true,
-	"x-stainless-os":                            true,
-	"x-stainless-arch":                          true,
-	"x-stainless-runtime":                       true,
-	"x-stainless-runtime-version":               true,
-	"x-stainless-helper-method":                 true,
-	"anthropic-dangerous-direct-browser-access": true,
-	"anthropic-version":                         true,
-	"x-app":                                     true,
-	"anthropic-beta":                            true,
-	"accept-language":                           true,
-	"sec-fetch-mode":                            true,
-	"user-agent":                                true,
-	"content-type":                              true,
-	"accept-encoding":                           true,
-	"x-claude-code-session-id":                  true,
-	"x-client-request-id":                       true,
+// blockedHeaders 禁止的 headers（黑名单模式）
+// 只拦截危险头，其他头全部放行，提高兼容性
+var blockedHeaders = map[string]bool{
+	"x-forwarded-for":       true, // 防止 IP 伪造
+	"x-real-ip":             true, // 防止 IP 伪造
+	"x-client-ip":           true, // 防止 IP 伪造
+	"forwarded":             true, // 防止代理信息泄露
+	"x-forwarded-host":      true, // 防止主机伪造
+	"x-forwarded-proto":     true, // 防止协议伪造
+}
+
+// isHeaderAllowed 检查 header 是否允许（黑名单模式）
+func isHeaderAllowed(key string) bool {
+	lowerKey := strings.ToLower(strings.TrimSpace(key))
+	return !blockedHeaders[lowerKey]
 }
 
 // GatewayCache 定义网关服务的缓存操作接口。
@@ -4008,7 +4000,8 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 			if err == nil && fp != nil {
 				// metadata 透传开启时跳过 metadata 注入
 				_, mimicMPT, _ := s.settingService.GetGatewayForwardingSettings(ctx)
-				if !mimicMPT {
+				// 请求体透传模式：完全不做任何修改
+				if !s.cfg.Gateway.BodyPassthroughEnabled && !mimicMPT {
 					if metadataUserID := s.buildOAuthMetadataUserID(parsed, account, fp); metadataUserID != "" {
 						normalizeOpts.injectMetadata = true
 						normalizeOpts.metadataUserID = metadataUserID
@@ -4785,8 +4778,7 @@ func (s *GatewayService) buildUpstreamRequestAnthropicAPIKeyPassthrough(
 
 	if c != nil && c.Request != nil {
 		for key, values := range c.Request.Header {
-			lowerKey := strings.ToLower(strings.TrimSpace(key))
-			if !allowedHeaders[lowerKey] {
+			if (!isHeaderAllowed(key)) {
 				continue
 			}
 			wireKey := resolveWireCasing(key)
@@ -5571,7 +5563,7 @@ func (s *GatewayService) buildUpstreamRequest(ctx context.Context, c *gin.Contex
 			// 2. 重写metadata.user_id（需要指纹中的ClientID和账号的account_uuid）
 			// 如果启用了会话ID伪装，会在重写后替换 session 部分为固定值
 			// 当 metadata 透传开启时跳过重写
-			if !enableMPT {
+			if !s.cfg.Gateway.BodyPassthroughEnabled && !enableMPT {
 				accountUUID := account.GetExtraString("account_uuid")
 				if accountUUID != "" && fp.ClientID != "" {
 					if newBody, err := s.identityService.RewriteUserIDWithMasking(ctx, body, account, accountUUID, fp.ClientID, fp.UserAgent); err == nil && len(newBody) > 0 {
@@ -5605,8 +5597,7 @@ func (s *GatewayService) buildUpstreamRequest(ctx context.Context, c *gin.Contex
 
 	// 白名单透传headers（恢复真实 wire casing）
 	for key, values := range clientHeaders {
-		lowerKey := strings.ToLower(key)
-		if allowedHeaders[lowerKey] {
+			if (isHeaderAllowed(key)) {
 			wireKey := resolveWireCasing(key)
 			for _, v := range values {
 				addHeaderRaw(req.Header, wireKey, v)
@@ -8416,8 +8407,7 @@ func (s *GatewayService) buildCountTokensRequestAnthropicAPIKeyPassthrough(
 
 	if c != nil && c.Request != nil {
 		for key, values := range c.Request.Header {
-			lowerKey := strings.ToLower(strings.TrimSpace(key))
-			if !allowedHeaders[lowerKey] {
+			if (!isHeaderAllowed(key)) {
 				continue
 			}
 			wireKey := resolveWireCasing(key)
@@ -8484,7 +8474,7 @@ func (s *GatewayService) buildCountTokensRequest(ctx context.Context, c *gin.Con
 		fp, err := s.identityService.GetOrCreateFingerprint(ctx, account.ID, clientHeaders)
 		if err == nil {
 			ctFingerprint = fp
-			if !ctEnableMPT {
+			if !s.cfg.Gateway.BodyPassthroughEnabled && !ctEnableMPT {
 				accountUUID := account.GetExtraString("account_uuid")
 				if accountUUID != "" && fp.ClientID != "" {
 					if newBody, err := s.identityService.RewriteUserIDWithMasking(ctx, body, account, accountUUID, fp.ClientID, fp.UserAgent); err == nil && len(newBody) > 0 {
@@ -8517,8 +8507,7 @@ func (s *GatewayService) buildCountTokensRequest(ctx context.Context, c *gin.Con
 
 	// 白名单透传 headers（恢复真实 wire casing）
 	for key, values := range clientHeaders {
-		lowerKey := strings.ToLower(key)
-		if allowedHeaders[lowerKey] {
+			if (isHeaderAllowed(key)) {
 			wireKey := resolveWireCasing(key)
 			for _, v := range values {
 				addHeaderRaw(req.Header, wireKey, v)
