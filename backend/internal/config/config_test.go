@@ -233,15 +233,13 @@ func TestLoadForcedCodexInstructionsTemplate(t *testing.T) {
 	configPath := filepath.Join(tempDir, "config.yaml")
 
 	require.NoError(t, os.WriteFile(templatePath, []byte("server-prefix\n\n{{ .ExistingInstructions }}"), 0o644))
-	// 使用简洁的 YAML 格式，避免解析问题
-	require.NoError(t, os.WriteFile(configPath, []byte("gateway:\n  forced_codex_instructions_template_file: "+templatePath+"\n"), 0o644))
+	yamlSafePath := filepath.ToSlash(templatePath)
+	require.NoError(t, os.WriteFile(configPath, []byte("gateway:\n  forced_codex_instructions_template_file: \""+yamlSafePath+"\"\n"), 0o644))
 	t.Setenv("DATA_DIR", tempDir)
-	// 清除其他可能的环境变量干扰
-	t.Setenv("CONFIG_PATH", "")
 
 	cfg, err := Load()
 	require.NoError(t, err)
-	require.Equal(t, templatePath, cfg.Gateway.ForcedCodexInstructionsTemplateFile)
+	require.Equal(t, yamlSafePath, cfg.Gateway.ForcedCodexInstructionsTemplateFile)
 	require.Equal(t, "server-prefix\n\n{{ .ExistingInstructions }}", cfg.Gateway.ForcedCodexInstructionsTemplate)
 }
 

@@ -17,13 +17,12 @@ jobs:
           go-version-file: backend/go.mod
           check-latest: false
           cache: true
+          cache-dependency-path: backend/go.sum
       - name: Verify Go version
         run: |
           go version | grep -q 'go1.26.2'
       - name: Unit tests
         working-directory: backend
-        env:
-          GOOGLE_CLOUD_PROJECT: test-project
         run: make test-unit
       - name: Integration tests
         working-directory: backend
@@ -38,12 +37,13 @@ jobs:
           go-version-file: backend/go.mod
           check-latest: false
           cache: true
+          cache-dependency-path: backend/go.sum
       - name: Verify Go version
         run: |
           go version | grep -q 'go1.26.2'
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: v2.9
           args: --timeout=30m
           working-directory: backend

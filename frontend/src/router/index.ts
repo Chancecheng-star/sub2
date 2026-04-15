@@ -267,7 +267,6 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiresAdmin: false,
       title: 'Payment',
-      titleKey: 'payment.stripePay',
       requiresPayment: true
     }
   },
@@ -445,6 +444,45 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+
+  // ==================== Payment Admin Routes ====================
+  {
+    path: '/admin/orders/dashboard',
+    name: 'AdminPaymentDashboard',
+    component: () => import('@/views/admin/orders/AdminPaymentDashboardView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Payment Dashboard',
+      titleKey: 'nav.paymentDashboard',
+      requiresPayment: true
+    }
+  },
+  {
+    path: '/admin/orders',
+    name: 'AdminOrders',
+    component: () => import('@/views/admin/orders/AdminOrdersView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Order Management',
+      titleKey: 'nav.orderManagement',
+      requiresPayment: true
+    }
+  },
+  {
+    path: '/admin/orders/plans',
+    name: 'AdminPaymentPlans',
+    component: () => import('@/views/admin/orders/AdminPaymentPlansView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Subscription Plans',
+      titleKey: 'nav.paymentPlans',
+      requiresPayment: true
+    }
+  },
+
   // ==================== 404 Not Found ====================
   {
     path: '/:pathMatch(.*)*',
@@ -559,6 +597,16 @@ router.beforeEach((to, _from, next) => {
     // User is authenticated but not admin, redirect to user dashboard
     next('/dashboard')
     return
+  }
+
+
+  // Check payment requirement (internal payment system only)
+  if (to.meta.requiresPayment) {
+    const paymentEnabled = appStore.cachedPublicSettings?.payment_enabled
+    if (!paymentEnabled) {
+      next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
+      return
+    }
   }
 
   // 简易模式下限制访问某些页面
