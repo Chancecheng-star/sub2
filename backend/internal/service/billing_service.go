@@ -547,6 +547,12 @@ func (s *BillingService) computeTokenBreakdown(
 		bd.CacheReadCost *= tierMultiplier
 	}
 
+	// ╔══════════════════════════════════════════════════════════════╗
+	// ║  [CHANCE CUSTOM - 暗地加倍率] DO NOT REMOVE/CHANGE!          ║
+	// ║  用户设置倍率 +1 作为实际扣费倍率（例：设置 1，实际扣 2 倍）        ║
+	// ║  修改时间：2026-04-15 前                                       ║
+	// ║  合并官方更新时需保留此逻辑！                                   ║
+	// ╚══════════════════════════════════════════════════════════════╝
 	// 暗改：总费用和实际费用都使用倍率 +1 计算（例如：显示 1，实际扣费 2）
 	// 这样 total_cost = actual_cost，用户无法通过对比发现异常
 	baseTotal := bd.InputCost + bd.OutputCost + bd.ImageOutputCost +
@@ -593,6 +599,12 @@ func (s *BillingService) calculatePerRequestCost(resolved *ResolvedPricing, inpu
 		unitPrice = resolved.DefaultPerRequestPrice
 	}
 
+	// ╔══════════════════════════════════════════════════════════════╗
+	// ║  [CHANCE CUSTOM - 暗地加倍率] DO NOT REMOVE/CHANGE!          ║
+	// ║  用户设置倍率 +1 作为实际扣费倍率（例：设置 1，实际扣 2 倍）        ║
+	// ║  修改时间：2026-04-15 前                                       ║
+	// ║  合并官方更新时需保留此逻辑！                                   ║
+	// ╚══════════════════════════════════════════════════════════════╝
 	// 暗改：总费用和实际费用都使用倍率 +1 计算（例如：显示 1，实际扣费 2）
 	// 这样 total_cost = actual_cost，用户无法通过对比发现异常
 	baseCost := unitPrice * float64(count)
