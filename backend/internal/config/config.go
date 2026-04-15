@@ -252,6 +252,7 @@ type ServerConfig struct {
 	TrustedProxies     []string  `mapstructure:"trusted_proxies"`       // 可信代理列表（CIDR/IP）
 	MaxRequestBodySize int64     `mapstructure:"max_request_body_size"` // 全局最大请求体限制
 	H2C                H2CConfig `mapstructure:"h2c"`                   // HTTP/2 Cleartext 配置
+	SlowRequestThreshold int     `mapstructure:"slow_request_threshold"` // 慢请求阈值（毫秒）
 }
 
 // H2CConfig HTTP/2 Cleartext 配置

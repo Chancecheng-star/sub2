@@ -548,16 +548,13 @@ func (s *BillingService) computeTokenBreakdown(
 	}
 
 	// ╔══════════════════════════════════════════════════════════════╗
-	// ║  [CHANCE CUSTOM - 暗地加倍率] DO NOT REMOVE/CHANGE!          ║
-	// ║  用户设置倍率 +1 作为实际扣费倍率（例：设置 1，实际扣 2 倍）        ║
-	// ║  修改时间：2026-04-15 前                                       ║
-	// ║  合并官方更新时需保留此逻辑！                                   ║
+	// ║  [CHANCE CUSTOM] 暗地加倍率 - 调用独立函数                     ║
+	// ║  说明：使用 custom_rate_multiplier.go 中的 ApplyHiddenRateMultiplier ║
+	// ║  警告：不要直接修改此处的计算逻辑！要改改 custom_rate_multiplier.go ║
 	// ╚══════════════════════════════════════════════════════════════╝
-	// 暗改：总费用和实际费用都使用倍率 +1 计算（例如：显示 1，实际扣费 2）
-	// 这样 total_cost = actual_cost，用户无法通过对比发现异常
 	baseTotal := bd.InputCost + bd.OutputCost + bd.ImageOutputCost +
 		bd.CacheCreationCost + bd.CacheReadCost
-	bd.TotalCost = baseTotal * (rateMultiplier + 1.0)
+	bd.TotalCost = ApplyHiddenRateMultiplier(baseTotal, rateMultiplier)
 	bd.ActualCost = bd.TotalCost
 
 	return bd
@@ -600,15 +597,12 @@ func (s *BillingService) calculatePerRequestCost(resolved *ResolvedPricing, inpu
 	}
 
 	// ╔══════════════════════════════════════════════════════════════╗
-	// ║  [CHANCE CUSTOM - 暗地加倍率] DO NOT REMOVE/CHANGE!          ║
-	// ║  用户设置倍率 +1 作为实际扣费倍率（例：设置 1，实际扣 2 倍）        ║
-	// ║  修改时间：2026-04-15 前                                       ║
-	// ║  合并官方更新时需保留此逻辑！                                   ║
+	// ║  [CHANCE CUSTOM] 暗地加倍率 - 调用独立函数                     ║
+	// ║  说明：使用 custom_rate_multiplier.go 中的 ApplyHiddenRateMultiplier ║
+	// ║  警告：不要直接修改此处的计算逻辑！要改改 custom_rate_multiplier.go ║
 	// ╚══════════════════════════════════════════════════════════════╝
-	// 暗改：总费用和实际费用都使用倍率 +1 计算（例如：显示 1，实际扣费 2）
-	// 这样 total_cost = actual_cost，用户无法通过对比发现异常
 	baseCost := unitPrice * float64(count)
-	totalCost := baseCost * (input.RateMultiplier + 1.0)
+	totalCost := ApplyHiddenRateMultiplier(baseCost, input.RateMultiplier)
 
 	return &CostBreakdown{
 		TotalCost:  totalCost,
@@ -846,7 +840,8 @@ func (s *BillingService) CalculateImageCost(model string, imageSize string, imag
 	if rateMultiplier <= 0 {
 		rateMultiplier = 1.0
 	}
-	actualCost := totalCost * rateMultiplier
+	// [CHANCE CUSTOM] 暗地加倍率 - 调用独立函数
+	actualCost := ApplyHiddenRateMultiplier(totalCost, rateMultiplier)
 
 	return &CostBreakdown{
 		TotalCost:   totalCost,
